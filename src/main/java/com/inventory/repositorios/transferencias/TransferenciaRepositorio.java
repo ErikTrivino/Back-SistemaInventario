@@ -11,7 +11,7 @@
         List<Transferencia> findByStatus(String status);
         
         @org.springframework.data.jpa.repository.Query("SELECT t FROM Transferencia t " +
-               "WHERE (t.originBranchId = :branchId OR t.destinationBranchId = :branchId) " +
+               "WHERE (:branchId IS NULL OR t.originBranchId = :branchId OR t.destinationBranchId = :branchId) " +
                "AND (:status IS NULL OR t.status = :status) " +
                "AND (:startDate IS NULL OR t.requestDate >= :startDate) " +
                "AND (:endDate IS NULL OR t.requestDate <= :endDate)")

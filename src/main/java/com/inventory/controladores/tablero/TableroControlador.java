@@ -1,25 +1,39 @@
-    package com.inventory.controladores.tablero;
-    import com.inventory.servicios.interfaces.tablero.TableroServicio;
-    import org.springframework.web.bind.annotation.*;
+package com.inventory.controladores.tablero;
+
+import com.inventory.servicios.interfaces.tablero.TableroServicio;
 import com.inventory.modelo.dto.comun.MensajeDTO;
-    import lombok.RequiredArgsConstructor;
-    import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
-    @RestController
-    @RequestMapping({"/api/tablero", "/api/tablero"})
-    @RequiredArgsConstructor
-    public class TableroControlador {
-        private final TableroServicio dashboardService;
+@RestController
+@RequestMapping("/api/tablero")
+@RequiredArgsConstructor
+public class TableroControlador {
+    private final TableroServicio tableroServicio;
 
-        @GetMapping({"/ventas", "/sales"})
-        public ResponseEntity<MensajeDTO<Object>> getSalesSummary() { return ResponseEntity.ok(new MensajeDTO<>(false, dashboardService.getSalesSummary())); }
-
-        @GetMapping({"/inventario", "/inventory"})
-        public ResponseEntity<MensajeDTO<Object>> getInventoryMetrics() { return ResponseEntity.ok(new MensajeDTO<>(false, dashboardService.getInventoryMetrics())); }
-
-        @GetMapping({"/transferencias", "/transfers"})
-        public ResponseEntity<MensajeDTO<Object>> getTransferStatusSummary() { return ResponseEntity.ok(new MensajeDTO<>(false, dashboardService.getTransferStatusSummary())); }
+    /** RF-24: Dashboard crítico — KPIs del día en tiempo real. */
+    @GetMapping("/resumen")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE', 'ADMIN')")
+    public ResponseEntity<MensajeDTO<Object>> resumenDiario() {
+        return ResponseEntity.ok(new MensajeDTO<>(false, tableroServicio.getResumenDiario()));
     }
+
+    /** RF-33: Lista de productos con stock por debajo del mínimo. */
+    @GetMapping("/alertas-stock")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE', 'ADMIN')")
+    public ResponseEntity<MensajeDTO<Object>> alertasStock() {
+        return ResponseEntity.ok(new MensajeDTO<>(false, tableroServicio.getAlertasStock()));
+    }
+
+    /** RF-24: Métricas de transferencias activas. */
+    @GetMapping("/transferencias")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE', 'ADMIN')")
+    public ResponseEntity<MensajeDTO<Object>> metricasTransferencias() {
+        return ResponseEntity.ok(new MensajeDTO<>(false, tableroServicio.getMetricasTransferencias()));
+    }
+}
 
 
 
