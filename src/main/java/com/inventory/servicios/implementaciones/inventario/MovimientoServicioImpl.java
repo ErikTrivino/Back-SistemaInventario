@@ -3,7 +3,6 @@ package com.inventory.servicios.implementaciones.inventario;
 import com.inventory.servicios.interfaces.inventario.MovimientoServicio;
 import com.inventory.servicios.interfaces.inventario.InventarioServicio;
 import com.inventory.modelo.dto.inventario.MovimientoRetiroDTO;
-import com.inventory.modelo.entidades.inventario.TipoMovimiento;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;

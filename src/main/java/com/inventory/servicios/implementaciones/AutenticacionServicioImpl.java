@@ -78,6 +78,19 @@ public class AutenticacionServicioImpl implements AutenticacionServicio {
         return "Usuario registrado exitosamente con rol " + dto.rol().name();
     }
 
+    /**
+     * RF-37: Cambia el rol de un usuario. Solo ADMIN puede ejecutar esta operación.
+     * La autorización se valida en el controlador con @PreAuthorize.
+     */
+    @Override
+    public String cambiarRol(Long id, com.inventory.modelo.enums.Rol nuevoRol) throws Exception {
+        Usuario usuario = userRepository.findById(id)
+                .orElseThrow(() -> new Exception("Usuario no encontrado con ID: " + id));
+        usuario.setRol(nuevoRol);
+        userRepository.save(usuario);
+        return "Rol del usuario " + usuario.getNombre() + " actualizado a " + nuevoRol.name();
+    }
+
     // ── Métodos privados auxiliares ────────────────────────────────────────────
 
     /**

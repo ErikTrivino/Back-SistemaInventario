@@ -30,6 +30,9 @@ public class Venta {
 
     @Column(name = "total_venta", precision = 15, scale = 2)
     private BigDecimal total;
+
+    @Column(name = "comprobante_original", unique = true)
+    private String comprobanteOriginal;
 }
 
 

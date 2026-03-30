@@ -1,36 +1,57 @@
-    package com.inventory.controladores.transferencias;
-    import com.inventory.servicios.interfaces.transferencias.TransferenciaServicio;
-    import com.inventory.modelo.dto.transferencias.TransferenciaCrearDTO;
-    import com.inventory.modelo.dto.transferencias.TransferenciaRecepcionParcialDTO;
-    import org.springframework.web.bind.annotation.*;
+package com.inventory.controladores.transferencias;
+
+import com.inventory.servicios.interfaces.transferencias.TransferenciaServicio;
+import com.inventory.modelo.dto.transferencias.*;
 import com.inventory.modelo.dto.comun.MensajeDTO;
-    import lombok.RequiredArgsConstructor;
-    import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
 
-    @RestController
-    @RequestMapping({"/api/transferencias", "/api/transferencias"})
-    @RequiredArgsConstructor
-    public class TransferenciaControlador {
-        private final TransferenciaServicio transferService;
+@RestController
+@RequestMapping("/api/transferencias")
+@RequiredArgsConstructor
+public class TransferenciaControlador {
+    private final TransferenciaServicio transferService;
 
-        @PostMapping({"/solicitar", "/request"})
-        public ResponseEntity<MensajeDTO<Object>> requestTransfer(@RequestBody TransferenciaCrearDTO dto) { return ResponseEntity.ok(new MensajeDTO<>(false, transferService.requestTransfer(dto))); }
-
-        @PutMapping({"/{id}/aprobar", "/{id}/approve"})
-        public ResponseEntity<MensajeDTO<Object>> approveTransfer(@PathVariable Long id) { transferService.approveTransfer(id); return ResponseEntity.ok(new MensajeDTO<>(false, "Operación exitosa")); }
-
-        @PutMapping({"/{id}/enviar", "/{id}/ship"})
-        public ResponseEntity<MensajeDTO<Object>> shipTransfer(@PathVariable Long id) { transferService.shipTransfer(id); return ResponseEntity.ok(new MensajeDTO<>(false, "Operación exitosa")); }
-
-        @PutMapping({"/{id}/recibir", "/{id}/receive"})
-        public ResponseEntity<MensajeDTO<Object>> receiveTransfer(@PathVariable Long id) { transferService.receiveTransfer(id); return ResponseEntity.ok(new MensajeDTO<>(false, "Operación exitosa")); }
-
-        @PutMapping({"/{id}/recibir-parcial", "/{id}/receive-partial"})
-        public ResponseEntity<MensajeDTO<Object>> receivePartialTransfer(@PathVariable Long id, @RequestBody TransferenciaRecepcionParcialDTO recepcionParcialDTO) {
-            transferService.receivePartialTransfer(id, recepcionParcialDTO);
-            return ResponseEntity.ok(new MensajeDTO<>(false, "Operación exitosa"));
-        }
+    /** RF-18: Solicitar transferencia entre sucursales. */
+    @PostMapping("/solicitar")
+    public ResponseEntity<MensajeDTO<Object>> solicitar(@Valid @RequestBody TransferenciaCrearDTO dto) {
+        Long userId = 1L; // Mock userId, reemplazar con extracción JWT
+        return ResponseEntity.ok(new MensajeDTO<>(false, transferService.requestTransfer(dto, userId)));
     }
+
+    /** RF-21: Preparar envío con cantidad confirmada. */
+    @PutMapping("/preparar")
+    public ResponseEntity<MensajeDTO<Object>> preparar(@Valid @RequestBody TransferenciaPrepararDTO dto) {
+        return ResponseEntity.ok(new MensajeDTO<>(false, transferService.prepareTransfer(dto)));
+    }
+
+    /** RF-19: Confirmar envío — descuenta stock en origen. */
+    @PutMapping("/enviar")
+    public ResponseEntity<MensajeDTO<Object>> enviar(@Valid @RequestBody TransferenciaConfirmarEnvioDTO dto) {
+        return ResponseEntity.ok(new MensajeDTO<>(false, transferService.shipTransfer(dto)));
+    }
+
+    /** RF-20: Confirmar recepción — suma stock en destino y registra discrepancias. */
+    @PutMapping("/recibir")
+    public ResponseEntity<MensajeDTO<Object>> recibir(@Valid @RequestBody TransferenciaRecepcionDTO dto) {
+        return ResponseEntity.ok(new MensajeDTO<>(false, transferService.receiveTransfer(dto)));
+    }
+
+    /** RF-23: Histórico filtrado de transferencias de la sucursal. */
+    @GetMapping("/historico")
+    public ResponseEntity<MensajeDTO<Object>> historico(
+            @RequestParam Long branchId,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta
+    ) {
+        return ResponseEntity.ok(new MensajeDTO<>(false, transferService.getTransfers(branchId, estado, desde, hasta)));
+    }
+}
 
 
 

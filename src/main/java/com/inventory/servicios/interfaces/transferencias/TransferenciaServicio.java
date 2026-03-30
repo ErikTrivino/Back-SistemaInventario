@@ -1,14 +1,14 @@
     package com.inventory.servicios.interfaces.transferencias;
-    import com.inventory.modelo.dto.transferencias.TransferenciaCrearDTO;
-    import com.inventory.modelo.dto.transferencias.TransferenciaInformacionDTO;
-    import com.inventory.modelo.dto.transferencias.TransferenciaRecepcionParcialDTO;
+    import com.inventory.modelo.dto.transferencias.*;
+    import java.time.LocalDateTime;
+    import java.util.List;
 
     public interface TransferenciaServicio {
-        TransferenciaInformacionDTO requestTransfer(TransferenciaCrearDTO dto);
-        void approveTransfer(Long transferId);
-        void shipTransfer(Long transferId);
-        void receiveTransfer(Long transferId);
-        void receivePartialTransfer(Long transferId, TransferenciaRecepcionParcialDTO recepcionParcialDTO);
+        TransferenciaInformacionDTO requestTransfer(TransferenciaCrearDTO dto, Long userId);
+        TransferenciaInformacionDTO prepareTransfer(TransferenciaPrepararDTO dto);
+        TransferenciaInformacionDTO shipTransfer(TransferenciaConfirmarEnvioDTO dto);
+        TransferenciaInformacionDTO receiveTransfer(TransferenciaRecepcionDTO dto);
+        List<TransferenciaInformacionDTO> getTransfers(Long branchId, String status, LocalDateTime startDate, LocalDateTime endDate);
     }
 
 

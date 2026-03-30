@@ -8,12 +8,11 @@ public record TransferenciaInformacionDTO(
         Long idSucursalOrigen,
         Long idSucursalDestino,
         Long idProducto,
-        BigDecimal cantidad,
+        BigDecimal cantidadSolicitada,
+        BigDecimal cantidadConfirmada,
+        BigDecimal cantidadRecibida,
         String estado,
         LocalDateTime fechaSolicitud,
-        LocalDateTime fechaEnvioEstimada,
+        LocalDateTime fechaEnvioEst,
         LocalDateTime fechaRecepcionReal
-) {
-}
-
-
+) {}

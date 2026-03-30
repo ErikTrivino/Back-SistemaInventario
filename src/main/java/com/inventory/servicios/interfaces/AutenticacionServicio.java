@@ -27,6 +27,17 @@ public interface AutenticacionServicio {
      * @throws Exception si el correo ya está registrado
      */
     String registrarUsuario(RegistroUsuarioDTO dto) throws Exception;
+
+    /**
+     * RF-37: Cambia el rol de un usuario existente.
+     * Solo puede ser ejecutado por un ADMIN.
+     *
+     * @param id ID del usuario
+     * @param nuevoRol rol a asignar
+     * @return mensaje de confirmación
+     * @throws Exception si el usuario no existe
+     */
+    String cambiarRol(Long id, com.inventory.modelo.enums.Rol nuevoRol) throws Exception;
 }
 
 

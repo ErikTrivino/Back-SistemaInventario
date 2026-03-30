@@ -8,8 +8,6 @@ public record VentaInformacionDTO(
         Long idSucursal,
         Long idUsuarioVendedor,
         Date fechaVenta,
-        BigDecimal totalVenta
-) {
-}
-
-
+        BigDecimal total,
+        String comprobanteOriginal
+) {}

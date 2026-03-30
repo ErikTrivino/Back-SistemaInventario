@@ -47,6 +47,12 @@ public class Transferencia {
 
     @Column(name = "fecha_recepcion_real")
     private LocalDateTime receivedDate;
+
+    @Column(name = "cantidad_confirmada", precision = 12, scale = 2)
+    private java.math.BigDecimal confirmedQuantity;
+
+    @Column(name = "cantidad_recibida", precision = 12, scale = 2)
+    private java.math.BigDecimal receivedQuantity;
 }
 
 

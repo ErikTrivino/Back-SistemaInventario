@@ -25,6 +25,15 @@ public class Proveedor {
 
     @Column(name = "contacto", length = 100)
     private String contact;
+
+    /** RF-38: Correo del proveedor para comunicaciones. */
+    @Column(name = "email", length = 120)
+    private String email;
+
+    /** RF-38: Estado lógico activo/inactivo del proveedor. */
+    @Builder.Default
+    @Column(name = "activo", nullable = false)
+    private boolean activo = true;
 }
 
 

@@ -3,12 +3,16 @@ package com.inventory.controladores;
 import com.inventory.modelo.dto.autenticacion.LoginDTO;
 import com.inventory.modelo.dto.autenticacion.RegistroUsuarioDTO;
 import com.inventory.modelo.dto.autenticacion.TokenDTO;
+import com.inventory.modelo.dto.autenticacion.CambiarRolDTO;
 import com.inventory.modelo.dto.comun.MensajeDTO;
 import com.inventory.servicios.interfaces.AutenticacionServicio;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,6 +58,25 @@ public class AutenticacionControlador {
     public ResponseEntity<MensajeDTO<String>> registrarUsuario(
             @Valid @RequestBody RegistroUsuarioDTO dto) throws Exception {
         String mensaje = autenticacionServicio.registrarUsuario(dto);
+        return ResponseEntity.ok(new MensajeDTO<>(false, mensaje));
+    }
+
+    /**
+     * RF-37: Cambia el rol de un usuario existente.
+     * Exclusivo para ADMIN — protegido con @PreAuthorize.
+     *
+     * PATCH /api/auth/usuarios/{id}/rol
+     *
+     * @param id  ID del usuario a modificar
+     * @param dto nuevo rol a asignar
+     * @return mensaje de confirmación
+     */
+    @PatchMapping("/usuarios/{id}/rol")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MensajeDTO<String>> cambiarRol(
+            @PathVariable Long id,
+            @Valid @RequestBody CambiarRolDTO dto) throws Exception {
+        String mensaje = autenticacionServicio.cambiarRol(id, dto.nuevoRol());
         return ResponseEntity.ok(new MensajeDTO<>(false, mensaje));
     }
 }

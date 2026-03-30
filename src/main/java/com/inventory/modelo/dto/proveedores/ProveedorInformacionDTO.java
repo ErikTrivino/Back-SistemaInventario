@@ -4,8 +4,9 @@ public record ProveedorInformacionDTO(
         Long idProveedor,
         String nitRut,
         String razonSocial,
-        String contacto
-) {
-}
+        String contacto,
+        String email,
+        boolean activo
+) {}
 
 
