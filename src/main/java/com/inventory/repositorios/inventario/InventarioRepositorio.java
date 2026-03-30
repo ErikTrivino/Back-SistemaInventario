@@ -14,6 +14,12 @@
         // Using a native/JPQL query as placeholder:
         @org.springframework.data.jpa.repository.Query("SELECT i FROM Inventario i WHERE i.stock < i.minStock")
         List<Inventario> findByQuantityLessThanMinStock();
+
+        @org.springframework.data.jpa.repository.Query("SELECT new com.inventory.modelo.dto.inventario.InventarioRespuestaDTO(" +
+               "p.id, p.name, p.sku, p.unitType, p.active, i.branchId, i.stock, i.minStock) " +
+               "FROM Inventario i JOIN Producto p ON i.productId = p.id " +
+               "WHERE i.branchId = :branchId AND p.active = true")
+        List<com.inventory.modelo.dto.inventario.InventarioRespuestaDTO> findActiveCatalogByBranch(@org.springframework.data.repository.query.Param("branchId") Long branchId);
     }
 
 

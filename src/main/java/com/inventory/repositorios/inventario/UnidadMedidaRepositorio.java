@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UnidadMedidaRepositorio extends JpaRepository<UnidadMedida, Long> {
+    java.util.List<UnidadMedida> findByProductId(Long productId);
 }
 
 

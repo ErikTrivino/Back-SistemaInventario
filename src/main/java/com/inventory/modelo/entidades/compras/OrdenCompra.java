@@ -35,6 +35,9 @@ public class OrdenCompra {
 
     @Column(name = "estado", nullable = false, length = 20)
     private String status;
+
+    @Column(name = "plazo_pago_dias")
+    private Integer plazoPagoDias;
 }
 
 

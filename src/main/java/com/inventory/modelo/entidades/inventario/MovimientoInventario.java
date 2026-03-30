@@ -41,6 +41,9 @@ public class MovimientoInventario {
 
     @Column(name = "referencia_id")
     private Long referenceId;
+
+    @Column(name = "motivo", columnDefinition = "TEXT")
+    private String reason;
 }
 
 

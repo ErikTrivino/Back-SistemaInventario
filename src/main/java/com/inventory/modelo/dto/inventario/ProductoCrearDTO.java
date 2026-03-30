@@ -11,7 +11,9 @@ public record ProductoCrearDTO(
         String descripcion,
         @Size(max = 50) String sku,
         @NotBlank @Size(max = 20) String unidadMedidaBase,
-        @DecimalMin("0.00") BigDecimal precioCostoPromedio
+        @DecimalMin("0.00") BigDecimal precioCostoPromedio,
+        @DecimalMin("0.00") BigDecimal cantidadInicial,
+        Long idSucursal
 ) {
 }
 

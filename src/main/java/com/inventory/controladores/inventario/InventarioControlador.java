@@ -26,9 +26,17 @@ import com.inventory.modelo.dto.comun.MensajeDTO;
         public ResponseEntity<MensajeDTO<Object>> deleteProduct(@PathVariable Long id) { inventoryService.deleteProduct(id); return ResponseEntity.ok(new MensajeDTO<>(false, "Operación exitosa")); }
 
         @GetMapping({"/inventario/{branchId}", "/inventory/{branchId}"})
+        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE', 'ADMIN')")
         public ResponseEntity<MensajeDTO<Object>> getInventoryByBranch(@PathVariable Long branchId) { return ResponseEntity.ok(new MensajeDTO<>(false, inventoryService.getInventoryByBranch(branchId))); }
 
+        @GetMapping({"/catalogo/{branchId}", "/catalog/{branchId}"})
+        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE', 'ADMIN')")
+        public ResponseEntity<MensajeDTO<Object>> getCatalogo(@PathVariable Long branchId) {
+            return ResponseEntity.ok(new MensajeDTO<>(false, inventoryService.getCatalogoActivo(branchId)));
+        }
+
         @PutMapping({"/inventario/actualizar-stock", "/inventory/update-stock"})
+        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE', 'ADMIN')")
         public ResponseEntity<MensajeDTO<Object>> updateStock(@RequestParam Long productId, @RequestParam Long branchId, @RequestParam Double quantity, @RequestParam String type, @RequestParam String reason) {
             inventoryService.updateStock(productId, branchId, quantity, type, reason);
             return ResponseEntity.ok(new MensajeDTO<>(false, "Operación exitosa"));

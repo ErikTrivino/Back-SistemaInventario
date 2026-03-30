@@ -32,6 +32,10 @@ public class Producto {
     @Builder.Default
     @Column(name = "precio_costo_promedio", nullable = false, precision = 12, scale = 2)
     private java.math.BigDecimal averageCost = java.math.BigDecimal.ZERO;
+
+    @Builder.Default
+    @Column(name = "activo", nullable = false)
+    private Boolean active = true;
 }
 
 

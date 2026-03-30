@@ -14,6 +14,7 @@
         List<InventarioInformacionDTO> getInventoryByBranch(Long branchId);
         void updateStock(Long productId, Long branchId, Double quantity, String type, String reason);
         List<InventarioInformacionDTO> getLowStockProducts();
+        List<com.inventory.modelo.dto.inventario.InventarioRespuestaDTO> getCatalogoActivo(Long branchId);
     }
 
 
