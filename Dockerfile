@@ -1,17 +1,18 @@
 # Etapa 1: Construcción
-FROM gradle:8.5-jdk21 AS build
-COPY --chown=gradle:gradle . /home/gradle/src
+FROM gradle:8.10-jdk21 AS build
 WORKDIR /home/gradle/src
-# Construimos el JAR saltando los tests para agilizar la imagen
+COPY --chown=gradle:gradle . .
 RUN gradle bootJar -x test --no-daemon
 
-# Etapa 2: Ejecución
-FROM openjdk:21-jdk-slim
+# Etapa 2: Ejecución (Runtime stage)
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
+
+# Exponer el puerto de la aplicación
 EXPOSE 8080
 
-# Copiamos el JAR generado en la etapa anterior
+# Copiar el JAR desde la etapa de construcción
 COPY --from=build /home/gradle/src/build/libs/SistemadeInventario-0.0.1-SNAPSHOT.jar app.jar
 
-# Configuración de entrada
+# Comando para ejecutar la aplicación
 ENTRYPOINT ["java", "-jar", "app.jar"]

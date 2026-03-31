@@ -13,9 +13,9 @@ import java.util.Optional;
 @Repository
 public interface InventarioRepositorio extends JpaRepository<Inventario, InventarioId> {
 
-    Optional<Inventario> findByProductoIdAndSucursalId(Long productoId, Long sucursalId);
+    Optional<Inventario> findByProducto_IdAndSucursal_Id(Long productoId, Long sucursalId);
 
-    List<Inventario> findBySucursalId(Long sucursalId);
+    List<Inventario> findBySucursal_Id(Long sucursalId);
 
     /** RF-29: Buscar productos con stock bajo el mínimo. */
     @Query("SELECT i FROM Inventario i WHERE i.stock < i.stockMinimo")

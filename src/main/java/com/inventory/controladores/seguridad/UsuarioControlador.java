@@ -2,6 +2,11 @@ package com.inventory.controladores.seguridad;
 
 import com.inventory.modelo.dto.comun.MensajeDTO;
 import com.inventory.modelo.dto.seguridad.UsuarioRequestDTO;
+import com.inventory.modelo.dto.autenticacion.CambiarRolDTO;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.inventory.modelo.dto.seguridad.UsuarioResponseDTO;
 import com.inventory.modelo.enums.Rol;
 import com.inventory.servicios.interfaces.seguridad.UsuarioServicio;
@@ -73,5 +78,33 @@ public class UsuarioControlador {
             @RequestParam(required = false) Boolean activo) {
         List<UsuarioResponseDTO> response = usuarioServicio.buscarPorNombre(query, activo);
         return ResponseEntity.ok(new MensajeDTO<>(false, response));
+    }
+
+    /**
+     * RF-37: Cambia el rol de un usuario existente.
+     * Exclusivo para ADMIN.
+     */
+    @PatchMapping("/{id}/rol")
+    public ResponseEntity<MensajeDTO<String>> cambiarRol(
+            @PathVariable Long id,
+            @Valid @RequestBody CambiarRolDTO dto) throws Exception {
+        String mensaje = usuarioServicio.cambiarRol(id, dto.nuevoRol());
+        return ResponseEntity.ok(new MensajeDTO<>(false, mensaje));
+    }
+
+    /**
+     * Obtiene una lista paginada de todos los usuarios.
+     * Solo para administradores.
+     */
+    @GetMapping
+    public ResponseEntity<MensajeDTO<Page<UsuarioResponseDTO>>> obtenerUsuarios(
+            @RequestParam(required = false, defaultValue = "10") Integer porPagina,
+            @RequestParam(required = false, defaultValue = "1") Integer pagina
+    ) {
+        int numPagina = (pagina != null && pagina > 0) ? pagina - 1 : 0;
+        int tamanoPagina = (porPagina != null && porPagina > 0) ? porPagina : 10;
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(numPagina, tamanoPagina);
+        Page<UsuarioResponseDTO> usuarios = usuarioServicio.obtenerUsuarios(pageable);
+        return ResponseEntity.ok(new MensajeDTO<>(false, usuarios));
     }
 }

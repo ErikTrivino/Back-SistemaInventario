@@ -113,6 +113,21 @@ public class UsuarioServicioImpl implements UsuarioServicio {
 
         return usuarios.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
+    @Override
+    @Transactional
+    public String cambiarRol(Long id, Rol nuevoRol) throws Exception {
+        Usuario usuario = usuarioRepositorio.findById(id)
+                .orElseThrow(() -> new Exception("Usuario no encontrado con ID: " + id));
+        usuario.setRol(nuevoRol);
+        usuarioRepositorio.save(usuario);
+        return "Rol del usuario " + usuario.getNombre() + " actualizado a " + nuevoRol.name();
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<UsuarioResponseDTO> obtenerUsuarios(org.springframework.data.domain.Pageable pageable) {
+        return usuarioRepositorio.findAll(pageable).map(this::mapToDTO);
+    }
+
 
     private UsuarioResponseDTO mapToDTO(Usuario usuario) {
         return UsuarioResponseDTO.builder()

@@ -93,13 +93,13 @@
 
         @Override
         public List<InventarioInformacionDTO> getInventoryByBranch(Long branchId) {
-            return inventoryRepository.findBySucursalId(branchId).stream().map(this::toInventarioInformacion).toList();
+            return inventoryRepository.findBySucursal_Id(branchId).stream().map(this::toInventarioInformacion).toList();
         }
 
         @Override
         @Transactional
         public void updateStock(Long productId, Long branchId, Double quantity, String type, String reason) {
-            Inventario inv = inventoryRepository.findByProductoIdAndSucursalId(productId, branchId)
+            Inventario inv = inventoryRepository.findByProducto_IdAndSucursal_Id(productId, branchId)
                     .orElseThrow(() -> new RuntimeException("Inventario not found"));
 
             java.math.BigDecimal amount = java.math.BigDecimal.valueOf(quantity);

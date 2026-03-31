@@ -26,4 +26,8 @@ public interface UsuarioServicio {
     List<UsuarioResponseDTO> filtrarPorRol(Rol rol);
 
     List<UsuarioResponseDTO> buscarPorNombre(String query, Boolean activo);
+
+    String cambiarRol(Long id, Rol nuevoRol) throws Exception;
+
+    org.springframework.data.domain.Page<UsuarioResponseDTO> obtenerUsuarios(org.springframework.data.domain.Pageable pageable);
 }

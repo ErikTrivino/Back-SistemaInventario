@@ -33,7 +33,7 @@ public class VentaServicioImpl implements VentaServicio {
 
     @Override
     public ValidacionStockDTO validateStock(Long productId, Long branchId, BigDecimal quantity) {
-        Inventario inv = inventoryRepository.findByProductoIdAndSucursalId(productId, branchId).orElse(null);
+        Inventario inv = inventoryRepository.findByProducto_IdAndSucursal_Id(productId, branchId).orElse(null);
         BigDecimal stock = inv != null ? inv.getStock() : BigDecimal.ZERO;
         
         return new ValidacionStockDTO(

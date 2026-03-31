@@ -82,7 +82,7 @@ public class InventarioServicioTest {
         mockInv.setStock(new BigDecimal("100.00"));
         mockInv.setStockMinimo(new BigDecimal("10.00"));
         
-        when(inventoryRepository.findByProductoIdAndSucursalId(productId, branchId))
+        when(inventoryRepository.findByProducto_IdAndSucursal_Id(productId, branchId))
                 .thenReturn(Optional.of(mockInv));
 
         assertDoesNotThrow(() -> 
@@ -91,7 +91,7 @@ public class InventarioServicioTest {
 
     @Test
     void testConsultarInventarioPorSucursal() throws Exception {
-        when(inventoryRepository.findBySucursalId(1L)).thenReturn(List.of());
+        when(inventoryRepository.findBySucursal_Id(1L)).thenReturn(List.of());
         List<InventarioInformacionDTO> inventario = inventarioServicio.getInventoryByBranch(1L);
         assertNotNull(inventario);
     }

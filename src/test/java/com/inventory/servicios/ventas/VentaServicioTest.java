@@ -66,7 +66,7 @@ public class VentaServicioTest {
         // Simular búsqueda de inventario con stock
         Inventario mockInv = new Inventario();
         mockInv.setStock(new BigDecimal("100.00"));
-        when(inventoryRepository.findByProductoIdAndSucursalId(any(), any()))
+        when(inventoryRepository.findByProducto_IdAndSucursal_Id(any(), any()))
                 .thenReturn(Optional.of(mockInv));
 
         // Simular guardado de venta
@@ -89,7 +89,7 @@ public class VentaServicioTest {
     void testValidarStock() throws Exception {
         Inventario mockInv = new Inventario();
         mockInv.setStock(new BigDecimal("10.00"));
-        when(inventoryRepository.findByProductoIdAndSucursalId(any(), any()))
+        when(inventoryRepository.findByProducto_IdAndSucursal_Id(any(), any()))
                 .thenReturn(Optional.of(mockInv));
 
         ValidacionStockDTO validacion = ventaServicio.validateStock(1L, 1L, new BigDecimal("1.00"));
