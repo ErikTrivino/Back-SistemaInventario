@@ -10,9 +10,9 @@ import lombok.*;
  * El campo {@code email} es el identificador principal para autenticación
  * (subject del JWT), siguiendo el patrón de Back-EventosClick.
  * El campo {@code rol} determina qué prefijos de ruta puede acceder:
- *   - ADMIN    → /api/admin/**
- *   - MANAGER  → /api/manager/**
- *   - OPERATOR → /api/operator/**
+ * - ADMIN → /api/admin/**
+ * - MANAGER → /api/manager/**
+ * - OPERATOR → /api/operator/**
  */
 @Entity
 @Table(name = "usuarios")
@@ -46,7 +46,7 @@ public class Usuario {
 
     /** Rol que determina el nivel de acceso a las rutas del API. */
     @Convert(converter = ConversorRol.class)
-    @Column(name = "id_rol", nullable = false)
+    @Column(name = "roles_id_rol", nullable = false) // id_rol
     private Rol rol;
 
     @Column(name = "id_sucursal_asignada")
@@ -61,8 +61,3 @@ public class Usuario {
     @Column(name = "motivo_inactivacion", columnDefinition = "TEXT")
     private String motivoInactivacion;
 }
-
-
-
-
-
