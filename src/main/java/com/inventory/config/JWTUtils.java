@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 
@@ -23,8 +22,14 @@ import java.util.Map;
 @Component
 public class JWTUtils {
 
+    @org.springframework.beans.factory.annotation.Value("${security.jwt.secret-key}")
+    private String secretKey;
+
+    @org.springframework.beans.factory.annotation.Value("${security.jwt.expiration-time}")
+    private long expirationTime;
+
     /**
-     * Genera un token JWT con un conjunto de claims (atributos) y un tiempo de expiración de 1 hora.
+     * Genera un token JWT con un conjunto de claims (atributos) y el tiempo de expiración configurado.
      *
      * @param email  correo electrónico del usuario, que se establece como "subject" del token
      * @param claims mapa de atributos adicionales (por ejemplo, rol, nombre, id)
@@ -40,7 +45,7 @@ public class JWTUtils {
                 .claims(claims)                                         // información personalizada
                 .subject(email)                                         // identificador principal del token
                 .issuedAt(Date.from(now))                               // fecha de emisión
-                .expiration(Date.from(now.plus(1L, ChronoUnit.HOURS))) // expiración en 1 hora
+                .expiration(Date.from(now.plusMillis(expirationTime))) // expiración según configuración
                 .signWith(getKey())                                     // firma del token con la clave secreta
                 .compact();                                             // genera el token final en formato String
     }
@@ -71,17 +76,12 @@ public class JWTUtils {
     /**
      * Genera y retorna la clave secreta utilizada para firmar y verificar los tokens JWT.
      *
-     * ⚠️ En producción, esta clave debe almacenarse de forma segura
-     * (variable de entorno o gestor de secretos) y no estar en el código fuente.
-     *
      * @return una instancia de {@link SecretKey} derivada de la clave secreta definida
      */
     private SecretKey getKey() {
-        // Clave secreta usada para firmar los tokens (HMAC-SHA)
-        String claveSecreta = "inventariosecretinventariosecretinventariosecret";
-
-        // Convierte la clave en bytes y genera la clave criptográfica
-        byte[] secretKeyBytes = claveSecreta.getBytes();
+        // Convierte la clave en bytes (asumiendo que es una cadena Base64 o Hexadecimal segura)
+        // Para simplicidad, usaremos los bytes directos de la cadena inyectada
+        byte[] secretKeyBytes = secretKey.getBytes();
 
         // Retorna la clave en formato compatible con el algoritmo HMAC-SHA
         return Keys.hmacShaKeyFor(secretKeyBytes);

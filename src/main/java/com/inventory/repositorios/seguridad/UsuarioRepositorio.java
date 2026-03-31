@@ -1,12 +1,14 @@
-package com.inventory.seguridad.repository;
+package com.inventory.repositorios.seguridad;
 
+import com.inventory.modelo.entidades.seguridad.Usuario;
 import com.inventory.modelo.enums.Rol;
-import com.inventory.seguridad.domain.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface UsuarioRepositorio extends JpaRepository<Usuario, Long> {
 
     /**
@@ -34,8 +36,3 @@ public interface UsuarioRepositorio extends JpaRepository<Usuario, Long> {
      */
     List<Usuario> findByActivo(Boolean activo);
 }
-
-
-
-
-

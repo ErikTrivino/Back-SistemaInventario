@@ -1,4 +1,4 @@
-package com.inventory.seguridad.domain;
+package com.inventory.modelo.entidades.seguridad;
 
 import com.inventory.modelo.enums.Rol;
 import jakarta.persistence.AttributeConverter;
@@ -31,5 +31,3 @@ public class ConversorRol implements AttributeConverter<Rol, Integer> {
         };
     }
 }
-
-

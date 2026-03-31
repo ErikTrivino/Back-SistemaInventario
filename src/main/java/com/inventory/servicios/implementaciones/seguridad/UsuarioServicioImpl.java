@@ -1,10 +1,12 @@
-package com.inventory.seguridad.service;
+package com.inventory.servicios.implementaciones.seguridad;
 
+import com.inventory.modelo.dto.seguridad.UsuarioRequestDTO;
+import com.inventory.modelo.dto.seguridad.UsuarioResponseDTO;
+import com.inventory.modelo.entidades.seguridad.Usuario;
 import com.inventory.modelo.enums.Rol;
-import com.inventory.seguridad.domain.Usuario;
-import com.inventory.seguridad.dto.UsuarioRequestDTO;
-import com.inventory.seguridad.dto.UsuarioResponseDTO;
-import com.inventory.seguridad.repository.UsuarioRepositorio;
+import com.inventory.repositorios.seguridad.UsuarioRepositorio;
+import com.inventory.servicios.interfaces.seguridad.UsuarioServicio;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,17 +14,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementación del servicio de gestión de usuarios.
+ */
 @Service
-public class UsuarioService {
+@RequiredArgsConstructor
+@Transactional
+public class UsuarioServicioImpl implements UsuarioServicio {
 
     private final UsuarioRepositorio usuarioRepositorio;
     private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepositorio usuarioRepositorio, PasswordEncoder passwordEncoder) {
-        this.usuarioRepositorio = usuarioRepositorio;
-        this.passwordEncoder = passwordEncoder;
-    }
-
+    @Override
     @Transactional
     public UsuarioResponseDTO crearUsuario(UsuarioRequestDTO request) {
         if (usuarioRepositorio.findByCorreo(request.getEmail()).isPresent()) {
@@ -42,18 +45,21 @@ public class UsuarioService {
         return mapToDTO(usuarioRepositorio.save(usuario));
     }
 
+    @Override
     public UsuarioResponseDTO consultarPorId(Long id) {
         Usuario usuario = usuarioRepositorio.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
         return mapToDTO(usuario);
     }
 
+    @Override
     public UsuarioResponseDTO consultarPorEmail(String email) {
         Usuario usuario = usuarioRepositorio.findByCorreo(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
         return mapToDTO(usuario);
     }
 
+    @Override
     @Transactional
     public UsuarioResponseDTO actualizarUsuario(Long id, UsuarioRequestDTO request) {
         Usuario usuario = usuarioRepositorio.findById(id)
@@ -68,6 +74,7 @@ public class UsuarioService {
         return mapToDTO(usuarioRepositorio.save(usuario));
     }
 
+    @Override
     @Transactional
     public void inactivarUsuario(Long id, String motivo) {
         Usuario usuario = usuarioRepositorio.findById(id)
@@ -77,18 +84,21 @@ public class UsuarioService {
         usuarioRepositorio.save(usuario);
     }
 
+    @Override
     public List<UsuarioResponseDTO> filtrarPorSucursal(Long sucursalId) {
         return usuarioRepositorio.findBySucursalAsignadaId(sucursalId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<UsuarioResponseDTO> filtrarPorRol(Rol rol) {
         return usuarioRepositorio.findByRol(rol).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<UsuarioResponseDTO> buscarPorNombre(String query, Boolean activo) {
         List<Usuario> usuarios;
         if (query != null && !query.isEmpty()) {
