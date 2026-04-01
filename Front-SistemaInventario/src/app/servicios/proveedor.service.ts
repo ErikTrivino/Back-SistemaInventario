@@ -1,52 +1,58 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { MensajeDTO } from '../modelo/mensaje-dto';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CrearProveedor } from '../modelo/crearObjetos';
-import { EditarProveedor } from '../modelo/editarObjeto';
+import { MensajeDTO } from '../modelo/mensaje-dto';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProveedorService {
-
-    private apiUrl = 'http://localhost:8080/proveedores/';
+  private apiUrl = `${environment.apiUrl}/api/proveedores`;
 
   constructor(private http: HttpClient) {}
-       private getAuthHeaders(): HttpHeaders {
-      const token = sessionStorage.getItem('AuthToken');
-      return new HttpHeaders({
-        'Authorization': `Bearer ${token}`
-      });
-    }
 
-  // Obtener lista de proveedores
-  getProveedores(): Observable<MensajeDTO> {
-    return this.http.get<MensajeDTO>(this.apiUrl + 'obtenerListaProveedores', { headers: this.getAuthHeaders() });
+  listar(pagina?: number, porPagina: number = 10): Observable<MensajeDTO> {
+    let params = new HttpParams().set('porPagina', porPagina.toString());
+    if (pagina !== undefined) params = params.set('pagina', pagina.toString());
+    return this.http.get<MensajeDTO>(this.apiUrl, { params });
   }
 
-  // Obtener proveedor por ID
-  getProveedor(id: number): Observable<MensajeDTO> {
-    return this.http.get<MensajeDTO>(`${this.apiUrl}obtenerProveedor/${id}`, { headers: this.getAuthHeaders() });
+  listarTodos(pagina?: number, porPagina: number = 10): Observable<MensajeDTO> {
+    let params = new HttpParams().set('porPagina', porPagina.toString());
+    if (pagina !== undefined) params = params.set('pagina', pagina.toString());
+    return this.http.get<MensajeDTO>(`${this.apiUrl}/todos`, { params });
   }
 
-  // Crear proveedor
-  crearProveedor(dto: CrearProveedor): Observable<MensajeDTO> {
-    return this.http.post<MensajeDTO>(this.apiUrl + 'crearProveedor', dto, { headers: this.getAuthHeaders() });
+  crear(dto: any): Observable<MensajeDTO> {
+    return this.http.post<MensajeDTO>(this.apiUrl, dto);
   }
 
-  // Eliminar proveedor
-  eliminarProveedor(id: number): Observable<MensajeDTO> {
-    return this.http.delete<MensajeDTO>(`${this.apiUrl}eliminarProveedor/${id}`, { headers: this.getAuthHeaders() });
+  actualizar(id: number, dto: any): Observable<MensajeDTO> {
+    return this.http.put<MensajeDTO>(`${this.apiUrl}/${id}`, dto);
   }
 
-  // Obtener productos de un proveedor
-  getProductosDeProveedor(idProveedor: number): Observable<MensajeDTO> {
-    return this.http.get<MensajeDTO>(`${this.apiUrl}productos/${idProveedor}`, { headers: this.getAuthHeaders() });
+  toggleEstado(id: number): Observable<MensajeDTO> {
+    return this.http.patch<MensajeDTO>(`${this.apiUrl}/${id}/estado`, null);
   }
 
-  // Editar proveedor
-  editarProveedor(dto: EditarProveedor): Observable<MensajeDTO> {
-    return this.http.post<MensajeDTO>(this.apiUrl + 'editarProvedor', dto, { headers: this.getAuthHeaders() });
+  registrarPrecio(dto: any): Observable<MensajeDTO> {
+    return this.http.post<MensajeDTO>(`${this.apiUrl}/lista-precios`, dto);
+  }
+
+  preciosPorProveedor(id: number, pagina?: number, porPagina: number = 10): Observable<MensajeDTO> {
+    let params = new HttpParams().set('porPagina', porPagina.toString());
+    if (pagina !== undefined) params = params.set('pagina', pagina.toString());
+    return this.http.get<MensajeDTO>(`${this.apiUrl}/${id}/lista-precios`, { params });
+  }
+
+  preciosPorProducto(idProducto: number, pagina?: number, porPagina: number = 10): Observable<MensajeDTO> {
+    let params = new HttpParams().set('porPagina', porPagina.toString());
+    if (pagina !== undefined) params = params.set('pagina', pagina.toString());
+    return this.http.get<MensajeDTO>(`${this.apiUrl}/producto/${idProducto}/precios`, { params });
+  }
+
+  cumplimiento(id: number): Observable<MensajeDTO> {
+    return this.http.get<MensajeDTO>(`${this.apiUrl}/${id}/cumplimiento`);
   }
 }

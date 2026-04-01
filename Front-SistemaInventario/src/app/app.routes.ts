@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';import { AppComponent } from './app.component';
+import { Routes } from '@angular/router'; import { AppComponent } from './app.component';
 import { GestionClientesComponent } from './componentes/gestion-clientes/gestion-clientes.component';
 import { EditarClienteComponent } from './componentes/editar-cliente/editar-cliente.component';
 import { CrearClienteComponent } from './componentes/crear-cliente/crear-cliente.component';
@@ -34,59 +34,62 @@ import { CrearDetalleServicioVehiculoComponent } from './componentes/crear-detal
 import { RolesGuard } from './guards/roles.service';
 import { LoginGuard } from './guards/permiso.service';
 import { LoginComponent } from './componentes/login/login.component';
+import { DashboardComponent } from './componentes/dashboard/dashboard.component';
 
 export const routes: Routes = [
-  
-{ path: 'gestion-clientes', component: GestionClientesComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'editar-cliente/:id', component: EditarClienteComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-cliente', component: CrearClienteComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'gestion-proveedor', component: GestionProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'editar-proveedor/:id', component: EditarProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-proveedor', component: CrearProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'gestion-clientes', component: GestionClientesComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'editar-cliente/:id', component: EditarClienteComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-cliente', component: CrearClienteComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'gestion-vehiculo', component: GestionVehiculoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'editar-vehiculo/:id', component: EditarVehiculoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-vehiculo', component: CrearVehiculoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'gestion-proveedor', component: GestionProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'editar-proveedor/:id', component: EditarProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-proveedor', component: CrearProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'gestion-usuario', component: GestionUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
-{ path: 'editar-usuario/:id', component: EditarUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
-{ path: 'crear-usuario', component: CrearUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
+    { path: 'gestion-vehiculo', component: GestionVehiculoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'editar-vehiculo/:id', component: EditarVehiculoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-vehiculo', component: CrearVehiculoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'gestion-producto', component: GestionProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'editar-producto/:id', component: EditarProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-producto', component: CrearProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'gestion-usuario', component: GestionUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
+    { path: 'editar-usuario/:id', component: EditarUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
+    { path: 'crear-usuario', component: CrearUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
 
-{ path: 'gestion-servicio', component: GestionServicioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'editar-servicio/:id', component: EditarServicioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-servicio', component: CrearServicioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'gestion-producto', component: GestionProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'editar-producto/:id', component: EditarProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-producto', component: CrearProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'gestion-factura', component: GestionFacturaComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'editar-factura/:id', component: EditarFacturaComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-factura', component: CrearFacturaComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'gestion-servicio', component: GestionServicioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'editar-servicio/:id', component: EditarServicioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-servicio', component: CrearServicioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'gestion-pedido', component: GestionPedidoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'editar-pedido/:id', component: EditarPedidoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-pedido', component: CrearPedidoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'gestion-factura', component: GestionFacturaComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'editar-factura/:id', component: EditarFacturaComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-factura', component: CrearFacturaComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'editar-detalle-servicio-producto/:id', component: EditarDetalleServicioProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-detalle-servicio-producto', component: CrearDetalleServicioProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'gestion-pedido', component: GestionPedidoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'editar-pedido/:id', component: EditarPedidoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-pedido', component: CrearPedidoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'editar-detalle-factura/:id', component: EditarDetalleFacturaComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-detalle-factura', component: CrearDetalleFacturaComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'editar-detalle-servicio-producto/:id', component: EditarDetalleServicioProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-detalle-servicio-producto', component: CrearDetalleServicioProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'editar-detalle-pedido/:id', component: EditarDetallePedidoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-detalle-pedido/:id', component: CrearDetallePedidoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'editar-detalle-factura/:id', component: EditarDetalleFacturaComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-detalle-factura', component: CrearDetalleFacturaComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'editar-detalle-servicio-vehiculo/:id', component: EditarDetalleServicioVehiculoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-{ path: 'crear-detalle-servicio-vehiculo', component: CrearDetalleServicioVehiculoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'editar-detalle-pedido/:id', component: EditarDetallePedidoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-detalle-pedido/:id', component: CrearDetallePedidoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
 
-{ path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
+    { path: 'editar-detalle-servicio-vehiculo/:id', component: EditarDetalleServicioVehiculoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+    { path: 'crear-detalle-servicio-vehiculo', component: CrearDetalleServicioVehiculoComponent },
+    { path: 'dashboard', component: DashboardComponent },
+    //{ path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+
+    { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
 
 
 
 
 
-  { path: "**", pathMatch: "full", redirectTo: "" }  // Redirección a la página de inicio para rutas no encontradas
+    { path: "**", pathMatch: "full", redirectTo: "dashboard" }  // Redirección a la página de inicio para rutas no encontradas
 ];
 

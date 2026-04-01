@@ -1,32 +1,22 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CrearUsuario } from '../modelo/crearObjetos';
-import { LoginDTO } from '../modelo/login-dto';
 import { MensajeDTO } from '../modelo/mensaje-dto';
-
-
+import { environment } from '../../environments/environment';
 
 @Injectable({
- providedIn: 'root'
+  providedIn: 'root'
 })
 export class AuthService {
-  
+  private authURL = `${environment.apiUrl}/api/auth`;
 
+  constructor(private http: HttpClient) {}
 
- private authURL = "http://localhost:8080/api/auth";
- 
+  public iniciarSesion(loginDTO: any): Observable<MensajeDTO> {
+    return this.http.post<MensajeDTO>(`${this.authURL}/iniciar-sesion`, loginDTO);
+  }
 
-
- constructor(private http: HttpClient) { }
-
-public crearCuenta(cuentaDTO: CrearUsuario): Observable<MensajeDTO> {
-  return this.http.post<MensajeDTO>(`${this.authURL}/crear-cuenta`, cuentaDTO);
- }
- 
- 
- public iniciarSesion(loginDTO: LoginDTO): Observable<MensajeDTO> {
-  return this.http.post<MensajeDTO>(`${this.authURL}/iniciar-sesion`, loginDTO);
- }
-
+  public registrarUsuario(dto: any): Observable<MensajeDTO> {
+    return this.http.post<MensajeDTO>(`${this.authURL}/registrar`, dto);
+  }
 }

@@ -1,0 +1,86 @@
+<div class="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
+  <!-- Clientes Card -->
+  <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
+    <div class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-gradient-to-tr from-blue-600 to-blue-400 text-white shadow-blue-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white">
+        <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122z" />
+      </svg>
+    </div>
+    <div class="p-4 text-right">
+      <p class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">Total Clientes</p>
+      <h4 class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">{{ totalClientes }}</h4>
+    </div>
+    <div class="border-t border-blue-gray-50 p-4">
+      <p class="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
+        <span class="text-green-500 font-bold">Activos</span> en el sistema
+      </p>
+    </div>
+  </div>
+
+  <!-- Productos Card -->
+  <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
+    <div class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-gradient-to-tr from-pink-600 to-pink-400 text-white shadow-pink-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white">
+        <path fill-rule="evenodd" d="M1.5 5.625c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v12.75c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 011.5 18.375V5.625z" clip-rule="evenodd"></path>
+      </svg>
+    </div>
+    <div class="p-4 text-right">
+      <p class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">Total Productos</p>
+      <h4 class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">{{ totalProductos }}</h4>
+    </div>
+    <div class="border-t border-blue-gray-50 p-4">
+      <p class="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
+        <span class="text-blue-500 font-bold">Catálogo</span> disponible
+      </p>
+    </div>
+  </div>
+
+  <!-- Facturas Card -->
+  <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
+    <div class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-gradient-to-tr from-green-600 to-green-400 text-white shadow-green-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white">
+        <path d="M12 7.5a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z"></path>
+        <path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 011.5 14.625v-9.75z" clip-rule="evenodd"></path>
+      </svg>
+    </div>
+    <div class="p-4 text-right">
+      <p class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">Facturas Emitidas</p>
+      <h4 class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">{{ totalFacturas }}</h4>
+    </div>
+    <div class="border-t border-blue-gray-50 p-4">
+      <p class="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
+        <span class="text-green-500 font-bold">Ventas</span> registradas
+      </p>
+    </div>
+  </div>
+
+  <!-- Pedidos Card -->
+  <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
+    <div class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-gradient-to-tr from-orange-600 to-orange-400 text-white shadow-orange-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white">
+        <path d="M2.25 2.25a.75.75 0 000 1.5h1.386c.17 0 .315.114.363.274l.71 2.37c.18.601.733 1.006 1.353 1.006h11.232c.621 0 1.173-.405 1.353-1.006l.71-2.37a.375.375 0 00-.363-.483h-16z" />
+      </svg>
+    </div>
+    <div class="p-4 text-right">
+      <p class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">Pedidos a Proveedores</p>
+      <h4 class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">{{ totalPedidos }}</h4>
+    </div>
+    <div class="border-t border-blue-gray-50 p-4">
+      <p class="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
+        <span class="text-orange-500 font-bold">Pendientes</span> de recepción
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-2">
+  <!-- Placeholder for recent activity or charts later -->
+  <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md overflow-hidden xl:col-span-2">
+    <div class="p-6">
+      <h6 class="block antialiased tracking-normal font-sans text-base font-semibold leading-relaxed text-blue-gray-900 mb-1">Bienvenido al Sistema de Inventario</h6>
+      <p class="antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">
+        Seleccione una opción en el menú lateral para gestionar los recursos.
+      </p>
+    </div>
+  </div>
+</div>
