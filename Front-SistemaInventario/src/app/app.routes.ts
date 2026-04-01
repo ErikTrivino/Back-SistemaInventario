@@ -14,21 +14,44 @@ import { LoginComponent } from './componentes/login/login.component';
 import { DashboardComponent } from './componentes/dashboard/dashboard.component';
 import { LayoutComponent } from './componentes/layout/layout.component';
 
+// New Components
+import { GestionMovimientosComponent } from './componentes/gestion-movimientos/gestion-movimientos.component';
+import { GestionTransferenciasComponent } from './componentes/gestion-transferencias/gestion-transferencias.component';
+import { GestionOrdenesCompraComponent } from './componentes/gestion-ordenes-compra/gestion-ordenes-compra.component';
+import { GestionRutasComponent } from './componentes/gestion-rutas/gestion-rutas.component';
+import { SeguimientoEnviosComponent } from './componentes/seguimiento-envios/seguimiento-envios.component';
+import { GestionSucursalesComponent } from './componentes/gestion-sucursales/gestion-sucursales.component';
+
 export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
     children: [
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'gestion-proveedor', component: GestionProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-      { path: 'editar-proveedor/:id', component: EditarProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-      { path: 'crear-proveedor', component: CrearProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
-      { path: 'gestion-usuario', component: GestionUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
-      { path: 'editar-usuario/:id', component: EditarUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
-      { path: 'crear-usuario', component: CrearUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
+
+      // Inventario
       { path: 'gestion-producto', component: GestionProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
       { path: 'editar-producto/:id', component: EditarProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
       { path: 'crear-producto', component: CrearProductoComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+      { path: 'gestion-movimientos', component: GestionMovimientosComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+      { path: 'gestion-transferencias', component: GestionTransferenciasComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+
+      // Abastecimiento
+      { path: 'gestion-proveedor', component: GestionProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+      { path: 'editar-proveedor/:id', component: EditarProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+      { path: 'crear-proveedor', component: CrearProveedorComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+      { path: 'gestion-ordenes-compra', component: GestionOrdenesCompraComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+
+      // Logística
+      { path: 'gestion-rutas', component: GestionRutasComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+      { path: 'seguimiento-envios', component: SeguimientoEnviosComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "USUARIO"] } },
+
+      // Configuración
+      { path: 'gestion-usuario', component: GestionUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
+      { path: 'editar-usuario/:id', component: EditarUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
+      { path: 'crear-usuario', component: CrearUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
+      { path: 'gestion-sucursales', component: GestionSucursalesComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

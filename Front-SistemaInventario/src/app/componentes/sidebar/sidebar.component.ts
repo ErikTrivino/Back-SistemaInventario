@@ -20,4 +20,8 @@ export class SidebarComponent {
   public isAdmin(): boolean {
     return this.tokenService.getRol() === 'ADMIN';
   }
+
+  public isLogged(): boolean {
+    return this.tokenService.isLogged();
+  }
 }
