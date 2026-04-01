@@ -1,0 +1,68 @@
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-header ps-5 pt-4 pb-4">
+      <h5 class="mb-0">
+        <i class="fa-solid fa-user me-3"></i>Gestión de Usuarios
+      </h5>
+    </div>
+
+    <div class="card-body p-5">
+      <div class="mb-3">
+        <button type="button" routerLink="/crear-usuario" class="btn btn-success me-2">
+          <i class="fa-solid fa-plus me-1"></i> Crear
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="confirmarEliminar()"
+          [disabled]="seleccionados.length === 0"
+        >
+          <i class="fa-solid fa-trash me-1"></i> Eliminar {{ textoBtnEliminar }}
+        </button>
+      </div>
+
+      <div class="rounded-xl w-100">
+        <div class="table-responsive">
+          <table class="table table-bordered w-100">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 40px;"></th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Identificación</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th style="width: 150px;">Contraseña</th>
+                <th>Estado</th>
+                <th>Rol</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of usuarios; trackBy: trackById">
+                <td><input #check type="checkbox" (change)="seleccionar(u, check.checked)" /></td>
+                <td>{{ u.nombre }}</td>
+                <td>{{ u.apellido }}</td>
+                <td>{{ u.identificacion }}</td>
+                <td>{{ u.numerophone }}</td>
+                <td>{{ u.correo }}</td>
+                <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ u.password }}</td>
+                <td>{{ u.estado }}</td>
+                <td>{{ u.rol }}</td>
+                <td>
+                  <button
+                    [routerLink]="['/editar-usuario', u.idUsuario]"
+                    class="btn btn-primary btn-sm"
+                  >
+                    <i class="fa-solid fa-pen me-1"></i> Editar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+<form [formGroup]="form" (ngSubmit)="crear()" class="container mt-4">
+  <div class="mb-3"><label>Nombre</label><input formControlName="nombre" class="form-control" /></div>
+  <div class="mb-3"><label>Descripción</label><input formControlName="descripcion" class="form-control" /></div>
+  <div class="mb-3"><label>Precio</label><input formControlName="precio" type="number" class="form-control" /></div>
+  <div class="mb-3"><label>Stock</label><input formControlName="stock" type="number" class="form-control" /></div>
+
+  <!-- Selector de proveedor -->
+  <div class="mb-3">
+    <label>Proveedor</label>
+    <select formControlName="idProveedor" class="form-select">
+      <option value="">Seleccione un proveedor</option>
+      <option *ngFor="let p of proveedores" [value]="p.id">{{ p.label }}</option>
+    </select>
+  </div>
+
+  <!-- Búsqueda manual -->
+  <div class="mb-3 input-group">
+    <input type="number" formControlName="idProveedor" placeholder="ID del proveedor" class="form-control" />
+    <button type="button" class="btn btn-outline-secondary" (click)="buscarProveedorPorId()">Buscar proveedor</button>
+  </div>
+
+  <button class="btn btn-primary" type="submit">Crear Producto</button>
+</form>

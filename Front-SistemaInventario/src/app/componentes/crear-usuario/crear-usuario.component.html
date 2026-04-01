@@ -1,0 +1,13 @@
+<form [formGroup]="form" (ngSubmit)="crear()" class="container mt-4">
+  <div class="mb-3"><label>Nombre</label><input formControlName="nombre" class="form-control" /></div>
+  <div class="mb-3"><label>Apellido</label><input formControlName="apellido" class="form-control" /></div>
+  <div class="mb-3"><label>Identificación</label><input formControlName="identificacion" class="form-control" /></div>
+  <div class="mb-3"><label>Teléfono</label><input formControlName="numerophone" class="form-control" /></div>
+  <div class="mb-3"><label>Edad</label><input formControlName="edad" type="number" class="form-control" /></div>
+  <div class="mb-3"><label>Correo</label><input formControlName="correo" type="email" class="form-control" /></div>
+  <div class="mb-3"><label>Contraseña</label><input formControlName="password" type="email" class="form-control" /></div>
+  <div class="mb-3"><label>Estado</label><input formControlName="estado" type="email" class="form-control" /></div>
+  <div class="mb-3"><label>Rol</label><input formControlName="rol" type="email" class="form-control" /></div>
+
+  <button class="btn btn-primary" type="submit">Crear Usuario</button>
+</form>

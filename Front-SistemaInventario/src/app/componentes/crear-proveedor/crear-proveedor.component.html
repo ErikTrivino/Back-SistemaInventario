@@ -1,0 +1,7 @@
+<form [formGroup]="form" (ngSubmit)="crear()" class="container mt-4">
+  <div class="mb-3"><label>Nombre</label><input formControlName="nombre" class="form-control" /></div>
+  <div class="mb-3"><label>Identificación</label><input formControlName="identificacion" class="form-control" /></div>
+  <div class="mb-3"><label>Teléfono</label><input formControlName="telefono" class="form-control" /></div>
+  <div class="mb-3"><label>Correo</label><input formControlName="correo" class="form-control" /></div>
+  <button class="btn btn-primary" type="submit">Crear Proveedor</button>
+</form>

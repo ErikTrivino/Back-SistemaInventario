@@ -1,0 +1,62 @@
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-header ps-5 pt-4 pb-4">
+      <h5 class="mb-0">
+        <i class="fa-solid fa-truck me-3"></i>Gestión de Proveedores
+      </h5>
+    </div>
+
+    <div class="card-body p-5">
+      <div class="mb-3">
+        <button type="button" routerLink="/crear-proveedor" class="btn btn-success me-2">
+          <i class="fa-solid fa-plus me-1"></i> Crear
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="confirmarEliminar()"
+          [disabled]="seleccionados.length === 0"
+        >
+          <i class="fa-solid fa-trash me-1"></i> Eliminar {{ textoBtnEliminar }}
+        </button>
+      </div>
+
+      <div class="rounded-xl w-100">
+        <div class="table-responsive">
+          <table class="table table-bordered w-100">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 40px;"></th>
+                <th>Nombre</th>
+                <th>Identificación</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of proveedores; trackBy: trackById">
+                <td>
+                  <input #check type="checkbox" (change)="seleccionar(p, check.checked)" />
+                </td>
+                <td>{{ p.nombre }}</td>
+                <td>{{ p.identificacion }}</td>
+                <td>{{ p.telefono }}</td>
+                <td>{{ p.correo }}</td>
+                <td>
+                  <button
+                    [routerLink]="['/editar-proveedor', p.idProveedor]"
+                    class="btn btn-primary btn-sm"
+                  >
+                    <i class="fa-solid fa-pen me-1"></i> Editar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
