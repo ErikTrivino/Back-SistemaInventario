@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 
@@ -13,26 +14,22 @@ import java.util.Map;
  * Utilidad para la generación y validación de tokens JWT (JSON Web Token).
  *
  * Esta clase se encarga de:
- *   - Generar tokens JWT firmados con una clave secreta.
- *   - Validar y analizar tokens existentes para obtener sus claims (información contenida).
+ *
+ *   Generar tokens JWT firmados con una clave secreta.
+ *   Validar y analizar tokens existentes para obtener sus claims (información contenida).
+ *
  *
  * Se usa principalmente en el proceso de autenticación y autorización
- * de usuarios dentro del sistema de inventario.
+ * de usuarios dentro de la aplicación.
  */
 @Component
 public class JWTUtils {
 
-    @org.springframework.beans.factory.annotation.Value("${security.jwt.secret-key}")
-    private String secretKey;
-
-    @org.springframework.beans.factory.annotation.Value("${security.jwt.expiration-time}")
-    private long expirationTime;
-
     /**
-     * Genera un token JWT con un conjunto de claims (atributos) y el tiempo de expiración configurado.
+     * Genera un token JWT con un conjunto de claims (atributos) y un tiempo de expiración de 1 hora.
      *
      * @param email  correo electrónico del usuario, que se establece como "subject" del token
-     * @param claims mapa de atributos adicionales (por ejemplo, rol, nombre, id)
+     * @param claims mapa de atributos adicionales que se incluirán dentro del token (por ejemplo, rol, nombre, etc.)
      * @return una cadena con el token JWT firmado
      */
     public String generarToken(String email, Map<String, Object> claims) {
@@ -42,12 +39,12 @@ public class JWTUtils {
 
         // Se construye el token con los datos proporcionados
         return Jwts.builder()
-                .claims(claims)                                         // información personalizada
-                .subject(email)                                         // identificador principal del token
-                .issuedAt(Date.from(now))                               // fecha de emisión
-                .expiration(Date.from(now.plusMillis(expirationTime))) // expiración según configuración
-                .signWith(getKey())                                     // firma del token con la clave secreta
-                .compact();                                             // genera el token final en formato String
+                .claims(claims) // información personalizada
+                .subject(email) // identificador principal del token (usuario)
+                .issuedAt(Date.from(now)) // fecha de emisión
+                .expiration(Date.from(now.plus(1L, ChronoUnit.HOURS))) // expiración en 1 hora
+                .signWith(getKey()) // firma del token con la clave secreta
+                .compact(); // genera el token final en formato String
     }
 
     /**
@@ -55,9 +52,9 @@ public class JWTUtils {
      *
      * @param jwtString token JWT a validar
      * @return un objeto {@link Jws} que contiene los claims del token si la validación es exitosa
-     * @throws ExpiredJwtException      si el token ha expirado
-     * @throws UnsupportedJwtException  si el token usa un formato no soportado
-     * @throws MalformedJwtException    si el token tiene un formato incorrecto
+     * @throws ExpiredJwtException si el token ha expirado
+     * @throws UnsupportedJwtException si el token usa un formato o algoritmo no soportado
+     * @throws MalformedJwtException si el token tiene un formato incorrecto
      * @throws IllegalArgumentException si el token está vacío o es nulo
      */
     public Jws<Claims> parseJwt(String jwtString)
@@ -66,7 +63,7 @@ public class JWTUtils {
 
         // Crea el parser con la clave secreta y valida la firma del token
         JwtParser jwtParser = Jwts.parser()
-                .verifyWith(getKey())
+                .verifyWith(getKey()) // se verifica la firma con la misma clave usada al generar
                 .build();
 
         // Retorna los claims (payload) del token si es válido
@@ -76,16 +73,19 @@ public class JWTUtils {
     /**
      * Genera y retorna la clave secreta utilizada para firmar y verificar los tokens JWT.
      *
+     * ⚠️ En producción, esta clave debe almacenarse de forma segura (por ejemplo, en una variable de entorno o gestor de secretos)
+     * y no estar codificada directamente en el código fuente.
+     *
      * @return una instancia de {@link SecretKey} derivada de la clave secreta definida
      */
     private SecretKey getKey() {
-        // Convierte la clave en bytes (asumiendo que es una cadena Base64 o Hexadecimal segura)
-        // Para simplicidad, usaremos los bytes directos de la cadena inyectada
-        byte[] secretKeyBytes = secretKey.getBytes();
+        // Clave secreta usada para firmar los tokens (HMAC-SHA)
+        String claveSecreta = "secretsecretsecretsecretsecretsecretsecretsecret";
+
+        // Convierte la clave en bytes y genera la clave criptográfica
+        byte[] secretKeyBytes = claveSecreta.getBytes();
 
         // Retorna la clave en formato compatible con el algoritmo HMAC-SHA
         return Keys.hmacShaKeyFor(secretKeyBytes);
     }
 }
-
-

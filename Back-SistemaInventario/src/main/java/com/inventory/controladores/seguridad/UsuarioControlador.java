@@ -12,7 +12,7 @@ import com.inventory.modelo.enums.Rol;
 import com.inventory.servicios.interfaces.seguridad.UsuarioServicio;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/usuarios")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+
 public class UsuarioControlador {
 
     private final UsuarioServicio usuarioServicio;

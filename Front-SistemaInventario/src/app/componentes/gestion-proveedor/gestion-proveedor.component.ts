@@ -5,17 +5,28 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { InformacionProveedor } from '../../modelo/informacionObjeto';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
+import { PaginadorComponent } from '../comun/paginador/paginador.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-gestion-proveedor',
+  selector: 'app-gestion-provider',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PaginadorComponent, FormsModule],
   templateUrl: './gestion-proveedor.component.html',
 })
 export class GestionProveedorComponent implements OnInit {
   proveedores: InformacionProveedor[] = [];
   seleccionados: InformacionProveedor[] = [];
   textoBtnAccion = '';
+
+  // Estado de paginación
+  paginaActual = 0;
+  totalPaginas = 0;
+  totalElementos = 0;
+  tamanoPagina = 10;
+
+  // Filtros
+  mostrarTodos = false;
 
   constructor(private svc: ProveedorService) {}
 
@@ -24,10 +35,44 @@ export class GestionProveedorComponent implements OnInit {
   }
 
   cargar(): void {
-    this.svc.listar().subscribe({
-      next: (data: MensajeDTO) => (this.proveedores = data.respuesta),
+    const observer = {
+      next: (data: MensajeDTO) => {
+        if (data.respuesta.content) {
+          this.proveedores = data.respuesta.content;
+          this.totalElementos = data.respuesta.totalElements;
+          this.totalPaginas = data.respuesta.totalPages;
+          this.paginaActual = data.respuesta.number;
+        } else {
+          this.proveedores = data.respuesta;
+          this.totalElementos = this.proveedores.length;
+          this.totalPaginas = 1;
+        }
+      },
       error: (e: any) => console.error(e),
-    });
+    };
+
+    if (this.mostrarTodos) {
+      this.svc.listarTodos(this.paginaActual + 1, this.tamanoPagina).subscribe(observer);
+    } else {
+      this.svc.listar(this.paginaActual + 1, this.tamanoPagina).subscribe(observer);
+    }
+  }
+
+  onCambioPagina(p: number) {
+    this.paginaActual = p;
+    this.cargar();
+  }
+
+  onCambioTamano(t: number) {
+    this.tamanoPagina = t;
+    this.paginaActual = 0;
+    this.cargar();
+  }
+
+  toggleMostrarTodos() {
+    this.mostrarTodos = !this.mostrarTodos;
+    this.paginaActual = 0;
+    this.cargar();
   }
 
   seleccionar(item: InformacionProveedor, sel: boolean) {
@@ -44,21 +89,8 @@ export class GestionProveedorComponent implements OnInit {
     this.textoBtnAccion = `${this.seleccionados.length} proveedor${this.seleccionados.length === 1 ? '' : 'es'}`;
   }
 
-  confirmarToggleEstado() {
-    Swal.fire({
-      title: '¿Cambiar estado?',
-      text: `Se cambiará el estado de ${this.seleccionados.length} proveedor(es).`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, cambiar',
-      cancelButtonText: 'Cancelar'
-    }).then((r) => {
-      if (r.isConfirmed) this.toggleEstadoSelec();
-    });
-  }
-
   toggleEstadoSelec() {
-    const promises = this.seleccionados.map(p => this.svc.toggleEstado(p.idProveedor).toPromise());
+    const promises = this.seleccionados.map(p => this.svc.toggleEstado(p.id).toPromise());
 
     Promise.all(promises)
       .then(() => {
@@ -74,6 +106,6 @@ export class GestionProveedorComponent implements OnInit {
   }
 
   trackById(_i: number, p: InformacionProveedor) {
-    return p.idProveedor;
+    return p.id;
   }
 }

@@ -7,7 +7,7 @@ import com.inventory.modelo.enums.Rol;
 import com.inventory.repositorios.seguridad.UsuarioRepositorio;
 import com.inventory.servicios.interfaces.seguridad.UsuarioServicio;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.inventory.config.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

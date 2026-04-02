@@ -22,16 +22,14 @@ export interface InformacionServicio {
 }
 
 export interface InformacionUsuario {
-  idUsuario: number;
+  id: number;
   nombre: string;
   apellido: string;
-  identificacion: number;
-  numerophone: number;
-  edad: number;
   correo: string;
-  password:string;
-  estado:string;
-  rol:string;
+  contrasena: string;
+  activo: boolean;
+  rol: string;
+  sucursalAsignadaId?: number;
 }
 
 export interface InformacionFactura {
@@ -44,22 +42,25 @@ export interface InformacionFactura {
 }
 
 export interface InformacionProducto {
-  idProducto: number;
+  id: number;
   nombre: string;
   descripcion: string;
-  available: number;
-  singlePrice: number;
-  idProveedor: number;
-  nombreProveedor?: string; // ← nuevo campo opcional
-
+  sku: string;
+  unidadMedidaBase: string;
+  precioCostoPromedio: number;
+  activo: boolean;
+  stock?: number; // From Inventario if joined
+  idProveedor?: number;
+  nombreProveedor?: string;
 }
 
 export interface InformacionProveedor {
-  idProveedor: number;
-  nombre: string;
-  identificacion: number;
-  telefono: number;
-  correo: string;
+  id: number;
+  razonSocial: string;
+  nitRut: string;
+  contacto: string;
+  email: string;
+  activo: boolean;
 }
 
 export interface InformacionPedido {

@@ -5,14 +5,12 @@ package com.inventory.modelo.enums;
  * Usado en los claims del token JWT para controlar el acceso
  * a los distintos prefijos de ruta.
  *
- *   ADMIN    → /api/admin/**
- *   MANAGER  → /api/manager/**
- *   OPERATOR → /api/operator/**
+ * ADMIN → /api/admin/**
+ * MANAGER → /api/manager/**
+ * OPERATOR → /api/operator/**
  */
 public enum Rol {
     ADMIN,
     MANAGER,
     OPERATOR
 }
-
-

@@ -6,17 +6,25 @@ import { RouterModule } from '@angular/router';
 import { InformacionProducto } from '../../modelo/informacionObjeto';
 import { ProveedorService } from '../../servicios/proveedor.service';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
+import { PaginadorComponent } from '../comun/paginador/paginador.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-gestion-producto',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PaginadorComponent, FormsModule],
   templateUrl: './gestion-producto.component.html'
 })
 export class GestionProductoComponent implements OnInit {
   productos: InformacionProducto[] = [];
   seleccionados: InformacionProducto[] = [];
   textoBtnEliminar = '';
+
+  // Estado de paginación
+  paginaActual = 0;
+  totalPaginas = 0;
+  totalElementos = 0;
+  tamanoPagina = 10;
 
   constructor(
     private inventarioService: InventarioService,
@@ -28,9 +36,19 @@ export class GestionProductoComponent implements OnInit {
   }
 
   cargar() {
-    this.inventarioService.getProducts().subscribe({
+    this.inventarioService.getProducts(this.paginaActual + 1, this.tamanoPagina).subscribe({
       next: (data: MensajeDTO) => {
-        this.productos = data.respuesta;
+        // Soporte para Page de Spring Boot o lista simple
+        if (data.respuesta.content) {
+          this.productos = data.respuesta.content;
+          this.totalElementos = data.respuesta.totalElements;
+          this.totalPaginas = data.respuesta.totalPages;
+          this.paginaActual = data.respuesta.number;
+        } else {
+          this.productos = data.respuesta;
+          this.totalElementos = this.productos.length;
+          this.totalPaginas = 1;
+        }
 
         // Buscar nombre del proveedor para cada producto de forma asíncrona
         for (let prod of this.productos) {
@@ -53,6 +71,17 @@ export class GestionProductoComponent implements OnInit {
         Swal.fire('Error', 'No se pudieron cargar los productos', 'error');
       }
     });
+  }
+
+  onCambioPagina(p: number) {
+    this.paginaActual = p;
+    this.cargar();
+  }
+
+  onCambioTamano(t: number) {
+    this.tamanoPagina = t;
+    this.paginaActual = 0;
+    this.cargar();
   }
 
   seleccionar(p: InformacionProducto, sel: boolean) {
@@ -84,7 +113,7 @@ export class GestionProductoComponent implements OnInit {
 
   eliminar() {
     const promises = this.seleccionados.map(p =>
-      this.inventarioService.deleteProduct(p.idProducto!).toPromise()
+      this.inventarioService.deleteProduct(p.id!).toPromise()
     );
 
     Promise.all(promises)
@@ -101,6 +130,6 @@ export class GestionProductoComponent implements OnInit {
   }
 
   trackById(_i: number, p: InformacionProducto) {
-    return p.idProducto;
+    return p.id;
   }
 }

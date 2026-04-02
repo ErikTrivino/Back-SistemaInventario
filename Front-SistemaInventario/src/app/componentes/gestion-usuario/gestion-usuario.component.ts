@@ -5,17 +5,30 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { InformacionUsuario } from '../../modelo/informacionObjeto';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
+import { PaginadorComponent } from '../comun/paginador/paginador.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-gestion-usuario',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PaginadorComponent, FormsModule],
   templateUrl: './gestion-usuario.component.html'
 })
 export class GestionUsuarioComponent implements OnInit {
   usuarios: InformacionUsuario[] = [];
   seleccionados: InformacionUsuario[] = [];
   textoBtnEliminar = '';
+
+  // Estado de paginación
+  paginaActual = 0;
+  totalPaginas = 0;
+  totalElementos = 0;
+  tamanoPagina = 10;
+
+  // Filtros
+  filtroNombre = '';
+  filtroRol = '';
+  filtroSucursal: number | null = null;
 
   constructor(private svc: UsuarioService) {}
 
@@ -24,10 +37,77 @@ export class GestionUsuarioComponent implements OnInit {
   }
 
   cargar() {
-    this.svc.getUsuarios().subscribe({
-      next: (data: MensajeDTO) => this.usuarios = data.respuesta,
+    if (this.filtroNombre || this.filtroRol || this.filtroSucursal) {
+      this.aplicarFiltros();
+      return;
+    }
+
+    this.svc.getUsuarios(this.paginaActual + 1, this.tamanoPagina).subscribe({
+      next: (data: MensajeDTO) => {
+        if (data.respuesta.content) {
+          this.usuarios = data.respuesta.content;
+          this.totalElementos = data.respuesta.totalElements;
+          this.totalPaginas = data.respuesta.totalPages;
+          this.paginaActual = data.respuesta.number;
+        } else {
+          this.usuarios = data.respuesta;
+          this.totalElementos = this.usuarios.length;
+          this.totalPaginas = 1;
+        }
+      },
       error: (e: any) => console.error(e)
     });
+  }
+
+  aplicarFiltros() {
+    // Si hay búsqueda por nombre
+    if (this.filtroNombre) {
+      this.svc.buscarPorNombre(this.filtroNombre, true).subscribe({
+        next: (data: MensajeDTO) => {
+          this.usuarios = data.respuesta;
+          this.actualizarMetadatosLocales();
+        }
+      });
+    } else if (this.filtroRol) {
+      this.svc.filtrarPorRol(this.filtroRol).subscribe({
+        next: (data: MensajeDTO) => {
+          this.usuarios = data.respuesta;
+          this.actualizarMetadatosLocales();
+        }
+      });
+    } else if (this.filtroSucursal) {
+      this.svc.filtrarPorSucursal(this.filtroSucursal).subscribe({
+        next: (data: MensajeDTO) => {
+          this.usuarios = data.respuesta;
+          this.actualizarMetadatosLocales();
+        }
+      });
+    }
+  }
+
+  private actualizarMetadatosLocales() {
+    this.totalElementos = this.usuarios.length;
+    this.totalPaginas = 1;
+    this.paginaActual = 0;
+  }
+
+  onCambioPagina(p: number) {
+    this.paginaActual = p;
+    this.cargar();
+  }
+
+  onCambioTamano(t: number) {
+    this.tamanoPagina = t;
+    this.paginaActual = 0;
+    this.cargar();
+  }
+
+  limpiarFiltros() {
+    this.filtroNombre = '';
+    this.filtroRol = '';
+    this.filtroSucursal = null;
+    this.paginaActual = 0;
+    this.cargar();
   }
 
   seleccionar(u: InformacionUsuario, sel: boolean) {
@@ -64,7 +144,7 @@ export class GestionUsuarioComponent implements OnInit {
 
   inactivar(motivo: string) {
     const promises = this.seleccionados.map(u =>
-      this.svc.inactivarUsuario(u.idUsuario!, motivo).toPromise()
+      this.svc.inactivarUsuario(u.id!, motivo).toPromise()
     );
 
     Promise.all(promises)
@@ -81,6 +161,6 @@ export class GestionUsuarioComponent implements OnInit {
   }
 
   trackById(_i: number, u: InformacionUsuario) {
-    return u.idUsuario;
+    return u.id;
   }
 }
