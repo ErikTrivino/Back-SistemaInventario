@@ -61,7 +61,7 @@ public class VentaServicioTest {
                 "Precio General" // lista de precio
         );
 
-        VentaCrearDTO dto = new VentaCrearDTO(1L, List.of(detalle));
+        VentaCrearDTO dto = new VentaCrearDTO(1L,1L, List.of(detalle));
 
         // Simular búsqueda de inventario con stock
         Inventario mockInv = new Inventario();
@@ -78,7 +78,7 @@ public class VentaServicioTest {
             return v;
         });
 
-        VentaInformacionDTO resultado = ventaServicio.createSale(dto, 1L);
+        VentaInformacionDTO resultado = ventaServicio.createSale(dto);
 
         assertNotNull(resultado);
         assertNotNull(resultado.idVenta());

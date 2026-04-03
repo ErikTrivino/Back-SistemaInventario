@@ -13,8 +13,8 @@ public class ConversorRol implements AttributeConverter<Rol, Integer> {
         }
         return switch (rol) {
             case ADMIN -> 1;
-            case MANAGER -> 2;
-            case OPERATOR -> 3;
+            case GERENTE -> 2;
+            case OPERADOR -> 3;
         };
     }
 
@@ -25,8 +25,8 @@ public class ConversorRol implements AttributeConverter<Rol, Integer> {
         }
         return switch (roleId) {
             case 1 -> Rol.ADMIN;
-            case 2 -> Rol.MANAGER;
-            case 3 -> Rol.OPERATOR;
+            case 2 -> Rol.GERENTE;
+            case 3 -> Rol.OPERADOR;
             default -> throw new IllegalArgumentException("Rol desconocido para id_role: " + roleId);
         };
     }

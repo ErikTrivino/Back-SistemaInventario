@@ -1,33 +1,266 @@
-<div class="min-h-screen bg-gray-50 p-6">
+<div class="min-h-screen bg-gray-50 flex flex-col">
 
   <!-- Header -->
-  <div class="mb-8">
-    <div class="flex items-center gap-3 mb-2">
-      <div class="bg-gradient-to-tr from-blue-600 to-blue-400 rounded-lg p-2 shadow-md">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white">
-          <path d="M2.25 2.25a.75.75 0 000 1.5h1.386c.17 0 .315.114.363.274l2.159 7.537A2.625 2.625 0 007.489 15h10.294a2.625 2.625 0 002.615-2.392l.592-7.105A.75.75 0 0020.244 4.5H5.446l-.29-1.013A1.875 1.875 0 003.358 2.25H2.25z" />
-          <path d="M7.5 19.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm10.5 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" />
-        </svg>
+  <header class="bg-white border-b border-gray-200 px-6 py-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-blue-600 rounded-lg p-2 shadow-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-gray-800">Módulo de Ventas</h1>
+          <p class="text-xs text-gray-500">Gestión de transacciones y comprobantes</p>
+        </div>
       </div>
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">Gestión de Ventas</h1>
-        <p class="text-gray-500 text-sm">Administra y registra las ventas del sistema</p>
+
+      <!-- Tab Switcher -->
+      <div class="flex bg-gray-100 p-1 rounded-xl">
+        <button 
+          (click)="switchTab('new-sale')"
+          [class.bg-white]="activeTab === 'new-sale'"
+          [class.shadow-sm]="activeTab === 'new-sale'"
+          [class.text-blue-600]="activeTab === 'new-sale'"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-gray-600 hover:text-gray-900">
+          Nueva Venta
+        </button>
+        <button 
+          (click)="switchTab('history')"
+          [class.bg-white]="activeTab === 'history'"
+          [class.shadow-sm]="activeTab === 'history'"
+          [class.text-blue-600]="activeTab === 'history'"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-gray-600 hover:text-gray-900">
+          Historial
+        </button>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- Placeholder content -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 flex flex-col items-center justify-center text-center">
-    <div class="bg-blue-50 rounded-full p-6 mb-6">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-blue-400">
-        <path d="M2.25 2.25a.75.75 0 000 1.5h1.386c.17 0 .315.114.363.274l2.159 7.537A2.625 2.625 0 007.489 15h10.294a2.625 2.625 0 002.615-2.392l.592-7.105A.75.75 0 0020.244 4.5H5.446l-.29-1.013A1.875 1.875 0 003.358 2.25H2.25z" />
-        <path d="M7.5 19.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm10.5 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" />
-      </svg>
-    </div>
-    <h2 class="text-xl font-semibold text-gray-700 mb-2">Módulo de Ventas</h2>
-    <p class="text-gray-400 max-w-md">
-      Este módulo está en construcción. Aquí podrás registrar, consultar y gestionar todas las ventas realizadas.
-    </p>
-  </div>
+  <main class="flex-1 overflow-hidden">
+    
+    <!-- Nueva Venta Tab -->
+    @if (activeTab === 'new-sale') {
+      <div class="h-full flex flex-col md:flex-row p-6 gap-6 overflow-hidden">
+        
+        <!-- Catálogo de Productos -->
+        <div class="flex-1 flex flex-col min-h-0 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-4 border-b border-gray-50 bg-gray-50/50">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </span>
+              <input 
+                type="text" 
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="filterCatalog()"
+                placeholder="Buscar producto por nombre o SKU..."
+                class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm">
+            </div>
+          </div>
+          
+          <div class="flex-1 overflow-y-auto p-4">
+            @if (isLoading) {
+              <div class="flex items-center justify-center h-full">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            } @else {
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                @for (prod of filteredCatalog; track prod.id) {
+                  <div class="group border border-gray-100 rounded-xl p-4 hover:border-blue-200 hover:shadow-md transition-all duration-200 cursor-pointer" (click)="addItemToSale(prod)">
+                    <div class="flex items-start justify-between mb-3">
+                      <div class="bg-blue-50 rounded-lg p-2 text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                      </div>
+                      <span class="text-xs font-semibold px-2 py-1 bg-green-50 text-green-600 rounded-full">Stock: {{prod.cantidad}}</span>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-sm mb-1 truncate">{{prod.nombre}}</h3>
+                    <p class="text-xs text-gray-400 mb-3 truncate">{{prod.sku}}</p>
+                    <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
+                      <span class="text-blue-600 font-bold">${{(prod.precioVenta || 0).toLocaleString()}}</span>
+                      <button class="text-blue-600 hover:text-blue-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
 
+          <!-- Paginador del Catálogo -->
+          <div class="px-4 py-3 bg-gray-50 border-t border-gray-100">
+            <app-paginador 
+              [paginaActual]="paginaActual"
+              [totalPaginas]="totalPaginas"
+              [totalElementos]="totalElementos"
+              [tamanoPagina]="tamanoPagina"
+              (cambioPagina)="onCambioPagina($event)"
+              (cambioTamano)="onCambioTamano($event)">
+            </app-paginador>
+          </div>
+        </div>
+
+        <!-- Carrito de Venta -->
+        <div class="w-full md:w-96 flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-4 border-b border-gray-50 flex items-center justify-between bg-blue-600 text-white">
+            <h2 class="font-bold">Resumen de Venta</h2>
+            <span class="text-xs bg-white/20 px-2 py-1 rounded-full">{{currentSaleItems.length}} items</span>
+          </div>
+          
+          <div class="flex-1 overflow-y-auto">
+            @if (currentSaleItems.length === 0) {
+              <div class="flex flex-col items-center justify-center h-full p-8 text-center">
+                <div class="bg-gray-50 rounded-full p-6 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div>
+                <p class="text-sm text-gray-400">El carrito está vacío. Haz clic en un producto para agregarlo.</p>
+              </div>
+            } @else {
+              <div class="divide-y divide-gray-50">
+                @for (item of currentSaleItems; track item.idProducto; let i = $index) {
+                  <div class="p-4 hover:bg-gray-50/50 transition-colors">
+                    <div class="flex justify-between items-start mb-2">
+                      <h4 class="text-sm font-semibold text-gray-700 leading-tight pr-4">{{item.nombre}}</h4>
+                      <button (click)="removeItem(i)" class="text-gray-300 hover:text-red-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <button (click)="updateQuantity(i, item.cantidad - 1)" class="w-6 h-6 rounded bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200">-</button>
+                        <span class="text-sm font-medium w-6 text-center">{{item.cantidad}}</span>
+                        <button (click)="updateQuantity(i, item.cantidad + 1)" class="w-6 h-6 rounded bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200">+</button>
+                      </div>
+                      <span class="text-sm font-bold text-gray-800">${{item.subtotal.toLocaleString()}}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          
+          <div class="p-6 border-t border-gray-100 bg-gray-50/50">
+            <div class="flex justify-between items-center mb-6">
+              <span class="text-gray-500 font-medium">Total:</span>
+              <span class="text-2xl font-bold text-blue-600">${{totalSale.toLocaleString()}}</span>
+            </div>
+            <button 
+              (click)="confirmSale()"
+              [disabled]="currentSaleItems.length === 0 || isLoading"
+              class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+              @if (isLoading) {
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Finalizar Venta
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Historial Tab -->
+    @if (activeTab === 'history') {
+      <div class="h-full flex flex-col p-6 overflow-hidden">
+        
+        <!-- Filtros -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-wrap items-end gap-4">
+          <div class="flex-1 min-w-[200px]">
+            <label class="block text-xs font-semibold text-gray-400 mb-1">SUCURSAL</label>
+            <select 
+              [(ngModel)]="selectedBranchId" 
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              @for (b of branches; track b.id) {
+                <option [value]="b.id">{{b.nombre}}</option>
+              }
+            </select>
+          </div>
+          <div class="w-40">
+            <label class="block text-xs font-semibold text-gray-400 mb-1">DESDE</label>
+            <input 
+              type="date" 
+              [(ngModel)]="startDate"
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div class="w-40">
+            <label class="block text-xs font-semibold text-gray-400 mb-1">HASTA</label>
+            <input 
+              type="date" 
+              [(ngModel)]="endDate"
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <button 
+            (click)="loadSalesHistory()"
+            class="bg-gray-800 hover:bg-gray-900 text-white px-6 py-2 rounded-xl text-sm font-bold transition-all shadow-md active:scale-95">
+            Filtrar
+          </button>
+        </div>
+
+        <!-- Tabla de Resultados -->
+        <div class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-50/50">
+                  <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Folio</th>
+                  <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Fecha</th>
+                  <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Responsable</th>
+                  <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Total</th>
+                  <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                @if (isLoading) {
+                   <tr><td colspan="5" class="p-10 text-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div></td></tr>
+                } @else if (salesHistory.length === 0) {
+                   <tr><td colspan="5" class="p-12 text-center text-gray-400">No se encontraron ventas para este criterio.</td></tr>
+                } @else {
+                  @for (sale of salesHistory; track sale.idVenta) {
+                    <tr class="hover:bg-gray-50/50 transition-colors group">
+                      <td class="px-6 py-4 text-sm font-bold text-blue-600">#{{sale.idVenta}}</td>
+                      <td class="px-6 py-4 text-sm text-gray-600">{{sale.fechaVenta | date:'short'}}</td>
+                      <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                          <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-[10px] uppercase font-bold">
+                            {{sale.nombreVendedor?.substring(0,2) || 'US'}}
+                          </div>
+                          <span class="text-sm text-gray-600">{{sale.nombreVendedor}}</span>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 text-sm font-bold text-gray-800">${{sale.total.toLocaleString()}}</td>
+                      <td class="px-6 py-4 text-right">
+                        <button 
+                          (click)="downloadReceipt(sale.idVenta)"
+                          class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          PDF
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
+  </main>
 </div>

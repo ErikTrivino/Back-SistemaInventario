@@ -105,9 +105,9 @@ public class VentaServicioImpl implements VentaServicio {
         }
 
         // Generar Comprobante PDF Realmente
-        byte[] pdf = receiptService.generarPdfVenta(saved.getId());
-        String fileName = receiptService.guardarComprobante(pdf, saved.getId() + "_" + saved.getComprobanteOriginal());
-        saved.setComprobanteOriginal(fileName);
+       // byte[] pdf = receiptService.generarPdfVenta(saved.getId());
+        //String fileName = receiptService.guardarComprobante(pdf, saved.getId() + "_" + saved.getComprobanteOriginal());
+        //saved.setComprobanteOriginal(fileName);
         saleRepository.save(saved);
 
         eventPublisher.publicarVentaCompletada(saved, dto.idResponsable().toString());

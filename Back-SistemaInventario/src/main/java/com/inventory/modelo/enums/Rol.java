@@ -6,11 +6,11 @@ package com.inventory.modelo.enums;
  * a los distintos prefijos de ruta.
  *
  * ADMIN → /api/admin/**
- * MANAGER → /api/manager/**
- * OPERATOR → /api/operator/**
+ * GERENTE → /api/manager/**
+ * OPERADOR → /api/operator/**
  */
 public enum Rol {
     ADMIN,
-    MANAGER,
-    OPERATOR
+    GERENTE,
+    OPERADOR
 }

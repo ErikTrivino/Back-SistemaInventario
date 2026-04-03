@@ -1,8 +1,128 @@
-<form [formGroup]="form" (ngSubmit)="editar()" class="container mt-4">
-  <input formControlName="idProveedor" type="hidden" />
-  <div class="mb-3"><label>Nombre</label><input formControlName="nombre" class="form-control" /></div>
-  <div class="mb-3"><label>Identificación</label><input formControlName="identificacion" class="form-control" /></div>
-  <div class="mb-3"><label>Teléfono</label><input formControlName="telefono" class="form-control" /></div>
-  <div class="mb-3"><label>Correo</label><input formControlName="correo" class="form-control" /></div>
-  <button class="btn btn-primary" type="submit">Guardar Cambios</button>
-</form>
+<div class="container mt-5 mb-5 pb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+      <!-- Card Container -->
+      <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+
+        <!-- Header with Gradient -->
+        <div class="card-header bg-primary bg-gradient text-white py-4 px-4 border-0">
+          <div class="d-flex align-items-center">
+            <div class="bg-white bg-opacity-25 rounded-3 p-3 me-3">
+              <i class="fas fa-truck-field shadow-sm text-white fs-2"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-0 text-white">Editar Proveedor</h3>
+              <p class="text-white-50 mb-0 small">Modifique la información del proveedor y guarde los cambios</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body p-5">
+          <form [formGroup]="form" (ngSubmit)="editar()" novalidate>
+
+            <div class="row g-4">
+
+              <!-- Razón Social -->
+              <div class="col-md-12">
+                <label class="form-label fw-bold text-secondary small text-uppercase tracking-wider">
+                  <i class="fas fa-building me-2 text-primary"></i>Razón Social
+                </label>
+                <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                  <input formControlName="razonSocial" class="form-control border-light"
+                    [ngClass]="{'is-invalid': form.get('razonSocial')?.invalid && form.get('razonSocial')?.touched}"
+                    placeholder="Nombre de la empresa o persona natural" />
+                </div>
+                <div class="text-danger small mt-1"
+                  *ngIf="form.get('razonSocial')?.invalid && form.get('razonSocial')?.touched">
+                  La razón social es obligatoria.
+                </div>
+              </div>
+
+              <!-- NIT / RUT -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-secondary small text-uppercase tracking-wider">
+                  <i class="fas fa-id-card me-2 text-primary"></i>NIT / RUT
+                </label>
+                <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                  <input formControlName="nitRut" class="form-control border-light"
+                    [ngClass]="{'is-invalid': form.get('nitRut')?.invalid && form.get('nitRut')?.touched}"
+                    placeholder="Ej: 123456789-0" />
+                </div>
+                <div class="text-danger small mt-1" *ngIf="form.get('nitRut')?.invalid && form.get('nitRut')?.touched">
+                  El NIT/RUT es obligatorio.
+                </div>
+              </div>
+
+              <!-- Contacto -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-secondary small text-uppercase tracking-wider">
+                  <i class="fas fa-user-tie me-2 text-primary"></i>Persona de Contacto
+                </label>
+                <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                  <input formControlName="contacto" class="form-control border-light"
+                    [ngClass]="{'is-invalid': form.get('contacto')?.invalid && form.get('contacto')?.touched}"
+                    placeholder="Nombre de contacto principal" />
+                </div>
+                <div class="text-danger small mt-1"
+                  *ngIf="form.get('contacto')?.invalid && form.get('contacto')?.touched">
+                  El nombre de contacto es obligatorio.
+                </div>
+              </div>
+
+              <!-- Correo -->
+              <div class="col-md-12">
+                <label class="form-label fw-bold text-secondary small text-uppercase tracking-wider">
+                  <i class="fas fa-envelope me-2 text-primary"></i>Correo Electrónico
+                </label>
+                <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                  <input formControlName="email" type="email" class="form-control border-light"
+                    [ngClass]="{'is-invalid': form.get('email')?.invalid && form.get('email')?.touched}"
+                    placeholder="correo@ejemplo.com" />
+                </div>
+                <div class="text-danger small mt-1" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+                  Ingrese un correo electrónico válido.
+                </div>
+              </div>
+
+              <!-- Estado Switch -->
+              <div class="col-12 mt-5">
+                <div
+                  class="p-4 bg-light rounded-4 border-1 border-dashed d-flex align-items-center justify-content-between transition-all"
+                  [ngStyle]="{'background-color': form.get('activo')?.value ? '#f0fff4' : '#fff5f5'}">
+                  <div>
+                    <h5 class="fw-bold mb-1" [ngClass]="form.get('activo')?.value ? 'text-success' : 'text-danger'">
+                      {{ form.get('activo')?.value ? 'Proveedor Activo' : 'Proveedor Inactivo' }}
+                    </h5>
+                    <p class="text-muted mb-0 small">
+                      {{ form.get('activo')?.value ? 'Este proveedor está habilitado para realizar órdenes de compra.' :
+                      'Este proveedor no aparecerá en las búsquedas de nuevas compras.' }}
+                    </p>
+                  </div>
+                  <div class="form-check form-switch fs-3">
+                    <input class="form-check-input cursor-pointer" type="checkbox" role="switch" id="activoSwitch"
+                      formControlName="activo">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end gap-3 mt-5">
+              <button class="btn btn-light btn-lg px-4 rounded-3 fw-bold border" type="button"
+                routerLink="/gestion-proveedor">
+                <i class="fas fa-times me-2"></i> volver
+              </button>
+              <button class="btn btn-primary btn-lg px-5 rounded-3 fw-bold shadow-sm bg-gradient ripple" type="submit"
+                [disabled]="form.invalid">
+                <i class="fas fa-save me-2"></i>Guardar Cambios
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

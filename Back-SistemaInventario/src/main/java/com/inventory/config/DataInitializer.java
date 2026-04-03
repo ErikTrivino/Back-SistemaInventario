@@ -156,7 +156,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private void seedRolEntidades() {
         if (rolEntidadRepository.count() == 0) {
-            String[] roles = { "ADMINISTRADOR", "VENDEDOR", "ALMACENERO", "GERENTE", "COORDINADOR" };
+            String[] roles = { "ADMIN", "GERENTE", "OPERADOR" };
             for (String r : roles) {
                 rolEntidadRepository.save(RolEntidad.builder().nombreRol(r).build());
             }
@@ -242,7 +242,7 @@ public class DataInitializer implements CommandLineRunner {
                         .apellido(sucursal.getNombre())
                         .correo("gerente" + sId + "@inventario.com")
                         .contrasena(pass)
-                        .rol(Rol.MANAGER)
+                        .rol(Rol.GERENTE)
                         .sucursalAsignadaId(sucursal.getId())
                         .activo(true)
                         .build());
@@ -253,7 +253,7 @@ public class DataInitializer implements CommandLineRunner {
                         .apellido(sucursal.getNombre())
                         .correo("operador" + sId + "@inventario.com")
                         .contrasena(pass)
-                        .rol(Rol.OPERATOR)
+                        .rol(Rol.OPERADOR)
                         .sucursalAsignadaId(sucursal.getId())
                         .activo(true)
                         .build());

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ProveedorService } from '../../servicios/proveedor.service';
+import { RouterModule } from '@angular/router';
 import Swal from 'sweetalert2';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
 import { CommonModule } from '@angular/common';
@@ -8,7 +9,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-crear-proveedor',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, RouterModule, CommonModule],
   templateUrl: './crear-proveedor.component.html'
 })
 export class CrearProveedorComponent {
@@ -16,10 +17,10 @@ export class CrearProveedorComponent {
 
   constructor(private fb: FormBuilder, private svc: ProveedorService) {
     this.form = fb.group({
-      nitRut: ['', Validators.required],
-      razonSocial: ['', Validators.required],
-      contacto: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]]
+      nitRut: ['', [Validators.required, Validators.maxLength(20)]],
+      razonSocial: ['', [Validators.required, Validators.maxLength(150)]],
+      contacto: ['', [Validators.maxLength(100)]],
+      email: ['', [Validators.email, Validators.maxLength(120)]]
     });
   }
 

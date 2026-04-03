@@ -7,6 +7,7 @@ import { InformacionUsuario } from '../../modelo/informacionObjeto';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
 import { PaginadorComponent } from '../comun/paginador/paginador.component';
 import { FormsModule } from '@angular/forms';
+import { SucursalService } from '../../servicios/sucursal.service';
 
 @Component({
   selector: 'app-gestion-usuario',
@@ -30,10 +31,22 @@ export class GestionUsuarioComponent implements OnInit {
   filtroRol = '';
   filtroSucursal: number | null = null;
 
-  constructor(private svc: UsuarioService) {}
+  sucursales: any[] = [];
+
+  constructor(private svc: UsuarioService, private sucursalSvc: SucursalService) {}
 
   ngOnInit() {
     this.cargar();
+    this.cargarSucursales();
+  }
+
+  cargarSucursales() {
+    this.sucursalSvc.listar().subscribe({
+      next: (data: MensajeDTO) => {
+        this.sucursales = data.respuesta;
+      },
+      error: (e: any) => console.error('Error cargando sucursales', e)
+    });
   }
 
   cargar() {

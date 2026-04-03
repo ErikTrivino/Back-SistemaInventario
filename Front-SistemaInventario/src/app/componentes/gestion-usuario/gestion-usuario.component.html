@@ -8,43 +8,45 @@
 
     <div class="card-body p-5">
       <!-- Sección de Filtros -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+      <div
+        class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
         <div class="relative">
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Buscar por Nombre</label>
           <div class="relative">
             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" [(ngModel)]="filtroNombre" (keyup.enter)="cargar()"
-                   placeholder="Ej: Juan Pérez"
-                   class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+            <input type="text" [(ngModel)]="filtroNombre" (keyup.enter)="cargar()" placeholder="Ej: Juan Pérez"
+              class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
           </div>
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Rol</label>
           <select [(ngModel)]="filtroRol" (change)="cargar()"
-                  class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
             <option value="">Todos los roles</option>
             <option value="ADMIN">Administrador</option>
-            <option value="MANAGER">Gestor</option>
-            <option value="OPERATOR">Operador</option>
+            <option value="GERENTE">Gerente</option>
+            <option value="OPERADOR">Operador</option>
           </select>
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Sucursal</label>
           <select [(ngModel)]="filtroSucursal" (change)="cargar()"
-                  class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
             <option [value]="null">Todas las sucursales</option>
-            <option value="1">Sucursal Principal</option>
-            <option value="2">Sucursal Norte</option>
+            <option *ngFor="let s of sucursales" [value]="s.id">{{ s.nombre }}</option>
           </select>
         </div>
 
         <div class="flex items-end gap-2">
-          <button (click)="cargar()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors shadow-sm">
+          <button (click)="cargar()"
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors shadow-sm">
             Filtrar
           </button>
-          <button (click)="limpiarFiltros()" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors" title="Limpiar filtros">
+          <button (click)="limpiarFiltros()"
+            class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors"
+            title="Limpiar filtros">
             <i class="fas fa-redo-alt"></i>
           </button>
         </div>
@@ -52,14 +54,16 @@
 
       <div class="mb-4 flex items-center justify-between">
         <div class="flex gap-2">
-          <button type="button" routerLink="/crear-usuario" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all shadow-sm">
-            <i class="fa-solid fa-plus text-sm"></i> 
+          <button type="button" routerLink="/crear-usuario"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all shadow-sm">
+            <i class="fa-solid fa-plus text-sm"></i>
             <span>Nuevo Usuario</span>
           </button>
 
-          <button type="button" class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:grayscale"
+          <button type="button"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:grayscale"
             (click)="confirmarInactivar()" [disabled]="seleccionados.length === 0">
-            <i class="fa-solid fa-user-slash text-sm"></i> 
+            <i class="fa-solid fa-user-slash text-sm"></i>
             <span>Inactivar {{ textoBtnEliminar }}</span>
           </button>
         </div>
@@ -79,14 +83,16 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-              <tr *ngFor="let u of usuarios; trackBy: trackById" class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+              <tr *ngFor="let u of usuarios; trackBy: trackById"
+                class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
                 <td class="ps-4">
-                  <input #check type="checkbox" (change)="seleccionar(u, check.checked)" 
-                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:bg-gray-700 dark:border-gray-600" />
+                  <input #check type="checkbox" (change)="seleccionar(u, check.checked)"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:bg-gray-700 dark:border-gray-600" />
                 </td>
                 <td class="py-4">
                   <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs uppercase">
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs uppercase">
                       {{ u.nombre.charAt(0) }}{{ u.apellido.charAt(0) }}
                     </div>
                     <div>
@@ -104,20 +110,22 @@
                   </div>
                 </td>
                 <td>
-                  <span [class]="u.activo ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'"
-                        class="px-2.5 py-0.5 rounded-full text-xs font-medium">
+                  <span
+                    [class]="u.activo ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'"
+                    class="px-2.5 py-0.5 rounded-full text-xs font-medium">
                     {{ u.activo ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>
                 <td>
-                  <div [class]="u.rol === 'ADMIN' ? 'text-purple-600' : 'text-black dark:text-slate-400'" class="text-xs font-bold tracking-wider uppercase">
+                  <div [class]="u.rol === 'ADMIN' ? 'text-purple-600' : 'text-black dark:text-slate-400'"
+                    class="text-xs font-bold tracking-wider uppercase">
                     <i class="fas fa-shield-alt mr-1" *ngIf="u.rol === 'ADMIN'"></i>
                     {{ u.rol }}
                   </div>
                 </td>
                 <td class="pe-4 text-right">
-                  <button [routerLink]="['/editar-usuario', u.id]" 
-                          class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50">
+                  <button [routerLink]="['/editar-usuario', u.id]"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50">
                     <i class="fa-solid fa-pen text-xs"></i>
                     <span>Editar</span>
                   </button>
@@ -127,13 +135,8 @@
           </table>
         </div>
 
-        <app-paginador 
-          [totalElementos]="totalElementos"
-          [totalPaginas]="totalPaginas"
-          [paginaActual]="paginaActual"
-          [tamanoPagina]="tamanoPagina"
-          (cambioPagina)="onCambioPagina($event)"
-          (cambioTamano)="onCambioTamano($event)">
+        <app-paginador [totalElementos]="totalElementos" [totalPaginas]="totalPaginas" [paginaActual]="paginaActual"
+          [tamanoPagina]="tamanoPagina" (cambioPagina)="onCambioPagina($event)" (cambioTamano)="onCambioTamano($event)">
         </app-paginador>
       </div>
     </div>

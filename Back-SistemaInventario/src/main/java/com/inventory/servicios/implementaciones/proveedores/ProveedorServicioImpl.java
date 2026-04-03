@@ -42,6 +42,8 @@ public class ProveedorServicioImpl implements ProveedorServicio {
                 .orElseThrow(() -> new RuntimeException("Proveedor no encontrado: " + id));
         supplier.setRazonSocial(dto.razonSocial());
         supplier.setContacto(dto.contacto());
+        supplier.setActivo(dto.activo());
+        supplier.setEmail(dto.email());
         return toInfo(supplierRepository.save(supplier));
     }
 

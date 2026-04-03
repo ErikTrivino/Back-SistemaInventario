@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import { EditarUsuario } from '../../modelo/editarObjeto';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
 import { CommonModule } from '@angular/common';
+import { SucursalService } from '../../servicios/sucursal.service';
 
 @Component({
   selector: 'app-editar-usuario',
@@ -15,33 +16,36 @@ import { CommonModule } from '@angular/common';
 })
 export class EditarUsuarioComponent implements OnInit {
   form!: FormGroup;
-  idUsuario!: number;
+  id!: number;
+  roles: string[] = ['ADMIN', 'GERENTE', 'OPERADOR'];
+  sucursales: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private svc: UsuarioService,
+    private sucursalSvc: SucursalService,
     private route: ActivatedRoute
   ) {
     this.form = fb.group({
-      idUsuario: [''],
+      id: [null],
       nombre: ['', Validators.required],
       apellido: ['', Validators.required],
-      identificacion: ['', Validators.required],
-      numerophone: ['', Validators.required],
-      edad: ['', [Validators.required, Validators.min(0)]],
       correo: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required],
-      estado: ['', Validators.required],
+      password: [''],
+      activo: [true],
       rol: ['', Validators.required],
+      sucursalAsignadaId: [null, Validators.required],
+      motivoInactivacion: ['']
     });
   }
 
   ngOnInit() {
+    this.cargarSucursales();
     this.route.paramMap.subscribe(params => {
       const val = params.get('id');
       if (val) {
-        this.idUsuario = +val;
-        this.svc.consultarPorId(this.idUsuario).subscribe({
+        this.id = +val;
+        this.svc.consultarPorId(this.id).subscribe({
           next: (data: MensajeDTO) => {
             this.form.patchValue(data.respuesta);
             this.form.patchValue({ password: '' });
@@ -55,9 +59,20 @@ export class EditarUsuarioComponent implements OnInit {
     });
   }
 
+  cargarSucursales() {
+    this.sucursalSvc.listar().subscribe({
+      next: (data: MensajeDTO) => {
+        this.sucursales = data.respuesta;
+      },
+      error: (err: any) => {
+        console.error('Error cargando sucursales', err);
+      }
+    });
+  }
+
   editar() {
     if (this.form.valid) {
-      this.svc.actualizarUsuario(this.idUsuario, this.form.value).subscribe({
+      this.svc.actualizarUsuario(this.id, this.form.value).subscribe({
         next: (data: MensajeDTO) => Swal.fire('Actualizado', data.respuesta || 'Usuario actualizado', 'success'),
         error: (err: any) => {
           console.error(err);

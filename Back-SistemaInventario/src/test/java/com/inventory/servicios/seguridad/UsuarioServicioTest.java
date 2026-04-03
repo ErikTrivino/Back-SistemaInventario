@@ -39,7 +39,7 @@ public class UsuarioServicioTest {
                 .apellido("Perez")
                 .email("juan.perez@example.com")
                 .password("securePass123")
-                .rol(Rol.OPERATOR)
+                .rol(Rol.OPERADOR)
                 .sucursalAsignadaId(1L)
                 .activo(true)
                 .build();
@@ -85,7 +85,7 @@ public class UsuarioServicioTest {
 
         UsuarioRequestDTO request = UsuarioRequestDTO.builder()
                 .nombre("Juan Actualizado")
-                .rol(Rol.MANAGER)
+                .rol(Rol.GERENTE)
                 .build();
 
         UsuarioResponseDTO resultado = usuarioServicio.actualizarUsuario(1L, request);

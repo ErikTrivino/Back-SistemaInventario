@@ -80,22 +80,22 @@ public class FiltroToken extends OncePerRequestFilter {
                 else if (requestURI.startsWith("/api/admin/")) {
                     error = validarToken(token, Rol.ADMIN);
                 }
-                // 3. Rutas de reportes (Solo MANAGER y ADMIN)
+                // 3. Rutas de reportes (Solo GERENTE y ADMIN)
                 else if (requestURI.startsWith("/api/reportes/")) {
-                    error = validarToken(token, Rol.MANAGER, Rol.ADMIN);
+                    error = validarToken(token, Rol.GERENTE, Rol.ADMIN);
                 }
-                // 4. Rutas operativas de inventario y proveedores (OPERATOR, MANAGER, ADMIN)
+                // 4. Rutas operativas de inventario y proveedores (OPERADOR, GERENTE, ADMIN)
                 else if (requestURI.startsWith("/api/proveedores/") || 
                          requestURI.startsWith("/api/inventario/") || 
                          requestURI.startsWith("/api/productos/") || 
                          requestURI.startsWith("/api/catalogo/") || 
                          requestURI.startsWith("/api/movimientos/")) {
                     
-                    error = validarToken(token, Rol.OPERATOR, Rol.MANAGER, Rol.ADMIN);
+                    error = validarToken(token, Rol.OPERADOR, Rol.GERENTE, Rol.ADMIN);
                 }
                 // 5. Resto de rutas de la API (por defecto proteger para cualquier rol válido)
                 else if (requestURI.startsWith("/api/")) {
-                    error = validarToken(token, Rol.OPERATOR, Rol.MANAGER, Rol.ADMIN);
+                    error = validarToken(token, Rol.OPERADOR, Rol.GERENTE, Rol.ADMIN);
                 }
                 else {
                     // Rutas fuera de /api/ (si existen)

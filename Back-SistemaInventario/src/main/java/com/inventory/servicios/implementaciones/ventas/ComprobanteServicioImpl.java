@@ -137,23 +137,8 @@ public class ComprobanteServicioImpl implements ComprobanteServicio {
 
     @Override
     public String obtenerBase64(Long ventaId) {
-        Venta venta = ventaRepositorio.findById(ventaId)
-                .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
-        
-        String fileName = venta.getComprobanteOriginal();
-        if (fileName == null || fileName.isEmpty()) {
-            throw new RuntimeException("El comprobante no ha sido generado para esta venta.");
-        }
-
-        try {
-            Path filePath = Paths.get(STORAGE_PATH).resolve(fileName);
-            if (!Files.exists(filePath)) {
-                throw new RuntimeException("El archivo físico del comprobante no existe.");
-            }
-            byte[] fileContent = Files.readAllBytes(filePath);
-            return Base64.getEncoder().encodeToString(fileContent);
-        } catch (IOException e) {
-            throw new RuntimeException("Error al leer el comprobante: " + e.getMessage(), e);
-        }
+        byte[] pdfContent = generarPdfVenta(ventaId);
+        return Base64.getEncoder().encodeToString(pdfContent);
     }
+
 }

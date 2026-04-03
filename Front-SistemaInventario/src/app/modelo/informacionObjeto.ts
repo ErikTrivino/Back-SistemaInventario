@@ -117,3 +117,99 @@ export interface ProductoDetallePorSucursalDTO {
   idSucursal: number;
   proveedor: number;
 }
+
+export interface VentaInformacionDTO {
+  idVenta: number;
+  idSucursal: number;
+  idUsuarioVendedor: number;
+  nombreVendedor?: string;
+  fechaVenta: string; // o Date (te explico abajo)
+  total: number;
+  comprobanteOriginal: string;
+}
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number; // página actual (0-based)
+}
+export interface ReporteVentasDTO {
+  fechaInicio: Date;
+  fechaFin: Date;
+  totalVentas: number;
+  ingresoTotal: number;
+  promedioVenta: number;
+  porSucursal: Page<ResumenVentaSucursalDTO>;
+}
+
+export interface ResumenVentaSucursalDTO {
+  idSucursal: number;
+  cantidadVentas: number;
+  ingresoTotal: number;
+}
+export interface ReporteInventarioDTO {
+  fechaGeneracion: Date;
+  idSucursal: number;
+  totalProductos: number;
+  productosEnStockMinimo: number;
+  productosAgotados: number;
+  valorTotalInventario: number;
+  detalle: Page<ItemInventarioDTO>;
+}
+
+export interface ItemInventarioDTO {
+  idProducto: number;
+  nombreProducto: string;
+  sku: string;
+  stockActual: number;
+  stockMinimo: number;
+  estadoStock: 'NORMAL' | 'BAJO' | 'AGOTADO';
+}
+export interface ReporteTransferenciasDTO {
+  fechaInicio: Date;
+  fechaFin: Date;
+  totalTransferencias: number;
+  completadas: number;
+  conDiscrepancias: number;
+  pendientes: number;
+  detalle: Page<ItemTransferenciaDTO>;
+}
+
+export interface ItemTransferenciaDTO {
+  idTransferencia: number;
+  idSucursalOrigen: number;
+  idSucursalDestino: number;
+  idProducto: number;
+  cantidadSolicitada: number;
+  cantidadRecibida: number;
+  estado: string;
+  fechaSolicitud: Date;
+  fechaRecepcion: Date;
+}
+export interface ReporteComparativoDTO {
+  anio: number;
+  meses: ResumenMensualDTO[];
+}
+
+export interface ResumenMensualDTO {
+  mes: number;
+  nombreMes: string;
+  cantidadVentas: number;
+  ingresoTotal: number;
+  variacionPorcentual: number;
+}
+export interface ReporteRotacionDTO {
+  anio: number;
+  mes: number;
+  productos: Page<ItemRotacionDTO>;
+}
+
+export interface ItemRotacionDTO {
+  idProducto: number;
+  nombreProducto: string;
+  totalSalidas: number;
+  valorTotalSalidas: number;
+  porcentajeParticipacion: number;
+  clasificacion: 'A' | 'B' | 'C';
+}

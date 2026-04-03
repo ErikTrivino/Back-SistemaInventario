@@ -22,10 +22,11 @@ export class EditarProveedorComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.form = fb.group({
-      nombre: ['', Validators.required],
-      identificacion: ['', Validators.required],
-      telefono: ['', Validators.required],
-      correo: ['', [Validators.required, Validators.email]]
+      razonSocial: ['', Validators.required],
+      nitRut: ['', Validators.required],
+      contacto: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      activo: [true]
     });
   }
 
@@ -36,6 +37,7 @@ export class EditarProveedorComponent implements OnInit {
         this.id = +val;
         this.svc.consultarPorId(this.id).subscribe({
           next: (data: MensajeDTO) => {
+
             this.form.patchValue(data.respuesta);
           },
           error: (err: any) => {
@@ -49,6 +51,7 @@ export class EditarProveedorComponent implements OnInit {
 
   editar() {
     if (this.form.valid) {
+      console.log(this.form.value);
       this.svc.actualizar(this.id, this.form.value).subscribe({
         next: (data: MensajeDTO) => Swal.fire('Actualizado', data.respuesta || 'Proveedor actualizado', 'success'),
         error: (err: any) => {

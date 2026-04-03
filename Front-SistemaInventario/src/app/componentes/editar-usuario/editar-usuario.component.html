@@ -1,13 +1,108 @@
-<form [formGroup]="form" (ngSubmit)="editar()" class="container mt-4">
-  <input formControlName="idUsuario" type="hidden" />
-  <div class="mb-3"><label>Nombre</label><input formControlName="nombre" class="form-control" /></div>
-  <div class="mb-3"><label>Apellido</label><input formControlName="apellido" class="form-control" /></div>
-  <div class="mb-3"><label>Identificación</label><input formControlName="identificacion" class="form-control" /></div>
-  <div class="mb-3"><label>Teléfono</label><input formControlName="numerophone" class="form-control" /></div>
-  <div class="mb-3"><label>Edad</label><input formControlName="edad" type="number" class="form-control" /></div>
-  <div class="mb-3"><label>Correo</label><input formControlName="correo" type="email" class="form-control" /></div>
-  <div class="mb-3"><label>Contraseña</label><input placeholder="Ingresa nueva Contraseña" formControlName="password" type="email" class="form-control" /></div>
-  <div class="mb-3"><label>Estado</label><input formControlName="estado" type="email" class="form-control" /></div>
-  <div class="mb-3"><label>Rol</label><input formControlName="rol" type="email" class="form-control" /></div>
-  <button class="btn btn-primary" type="submit">Guardar Cambios</button>
-</form>
+<div class="container mt-5">
+  <div class="card shadow-sm border-0 rounded-3">
+    <div class="card-header bg-primary text-white py-3">
+      <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Editar Usuario</h4>
+    </div>
+    <div class="card-body p-4">
+      <form [formGroup]="form" (ngSubmit)="editar()">
+        <input formControlName="id" type="hidden" />
+        
+        <div class="row g-3">
+          <!-- Nombre -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Nombre</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-muted"></i></span>
+              <input formControlName="nombre" class="form-control border-start-0 ps-0" placeholder="Ej. Juan" 
+                     [class.is-invalid]="form.get('nombre')?.invalid && form.get('nombre')?.touched" />
+            </div>
+          </div>
+
+          <!-- Apellido -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Apellido</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-muted"></i></span>
+              <input formControlName="apellido" class="form-control border-start-0 ps-0" placeholder="Ej. Pérez" 
+                     [class.is-invalid]="form.get('apellido')?.invalid && form.get('apellido')?.touched" />
+            </div>
+          </div>
+
+          <!-- Correo -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Correo Electrónico</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fas fa-envelope text-muted"></i></span>
+              <input formControlName="correo" type="email" class="form-control border-start-0 ps-0" placeholder="juan.perez@ejemplo.com" 
+                     [class.is-invalid]="form.get('correo')?.invalid && form.get('correo')?.touched" />
+            </div>
+          </div>
+
+          <!-- Rol -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Rol de Usuario</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fas fa-user-tag text-muted"></i></span>
+              <select formControlName="rol" class="form-select border-start-0 ps-0" 
+                      [class.is-invalid]="form.get('rol')?.invalid && form.get('rol')?.touched">
+                <option value="" disabled selected>Seleccione un rol</option>
+                <option *ngFor="let rol of roles" [value]="rol">{{ rol }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sucursal -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Sucursal Asignada</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fas fa-store text-muted"></i></span>
+              <select formControlName="sucursalAsignadaId" class="form-select border-start-0 ps-0" 
+                      [class.is-invalid]="form.get('sucursalAsignadaId')?.invalid && form.get('sucursalAsignadaId')?.touched">
+                <option [value]="null" disabled selected>Seleccione una sucursal</option>
+                <option *ngFor="let suc of sucursales" [value]="suc.id">{{ suc.nombre }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Nueva Contraseña (Opcional)</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
+              <input formControlName="password" type="password" class="form-control border-start-0 ps-0" placeholder="Dejar en blanco si no se desea cambiar" />
+            </div>
+          </div>
+
+          <!-- Activo -->
+          <div class="col-12 mt-4">
+            <div class="form-check form-switch p-3 bg-light rounded-2 border">
+              <input class="form-check-input ms-0 me-3" type="checkbox" id="flexSwitchCheckChecked" formControlName="activo">
+              <label class="form-check-label fw-bold" for="flexSwitchCheckChecked">Usuario Activo</label>
+            </div>
+          </div>
+
+          <!-- Motivo de Inactivación -->
+          <div class="col-12" *ngIf="form.get('activo')?.value === false">
+            <label class="form-label fw-bold text-danger">Motivo de Inactivación</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="fas fa-comment-slash text-muted"></i></span>
+              <textarea formControlName="motivoInactivacion" class="form-control border-start-0 ps-0" rows="2" placeholder="Explique por qué se inactiva el usuario"></textarea>
+            </div>
+          </div>
+
+          <div class="col-12 mt-4 d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-secondary px-4 text-dark" type="button" routerLink="/gestion-usuario">
+              <i class="fas fa-arrow-left me-2"></i>Volver
+            </button>
+            <button class="btn btn-outline-warning px-4" type="button" (click)="form.reset({activo: true})">
+              <i class="fas fa-eraser me-2"></i>Limpiar
+            </button>
+            <button class="btn btn-primary px-5 shadow-sm" type="submit" [disabled]="form.invalid">
+              <i class="fas fa-save me-2"></i>Guardar Cambios
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

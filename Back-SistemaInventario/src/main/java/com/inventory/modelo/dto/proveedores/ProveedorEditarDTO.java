@@ -6,7 +6,9 @@ import jakarta.validation.constraints.Size;
 public record ProveedorEditarDTO(
         @NotBlank @Size(max = 20) String nitRut,
         @NotBlank @Size(max = 150) String razonSocial,
-        @Size(max = 100) String contacto
+        @Size(max = 100) String contacto,
+        String email,
+        boolean activo
 ) {
 }
 
