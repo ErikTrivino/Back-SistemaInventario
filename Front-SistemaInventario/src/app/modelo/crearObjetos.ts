@@ -113,6 +113,11 @@ export interface TransferenciaConfirmarEnvioDTO {
   idTransferencia: number;
 }
 
+export interface TransferenciaConfirmarEnvioConCambiosDTO {
+  idTransferencia: number;
+  StockAceptadoEnvio: number;
+}
+
 export interface TransferenciaRecepcionDTO {
   idTransferencia: number;
   cantidadRecibida: number;

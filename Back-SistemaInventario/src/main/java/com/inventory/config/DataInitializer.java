@@ -222,21 +222,42 @@ public class DataInitializer implements CommandLineRunner {
             List<Usuario> list = new ArrayList<>();
             String pass = passwordEncoder.encode("password123");
 
-            // Asignamos sucursales de forma secuencial para pruebas consistentes
-            Sucursal sedePrincipal = sucursales.get(0);
-            Sucursal sucursalNorte = sucursales.size() > 1 ? sucursales.get(1) : sedePrincipal;
-            Sucursal sucursalMedellin = sucursales.size() > 2 ? sucursales.get(2) : sedePrincipal;
+            for (Sucursal sucursal : sucursales) {
+                Long sId = sucursal.getId();
 
-            list.add(Usuario.builder().nombre("Juan").apellido("Vendedor").correo("juan.vendedor@inventario.com")
-                    .contrasena(pass).rol(Rol.MANAGER).sucursalAsignadaId(sedePrincipal.getId()).activo(true).build());
-            list.add(Usuario.builder().nombre("María").apellido("Almacén").correo("maria.almacen@inventario.com")
-                    .contrasena(pass).rol(Rol.OPERATOR).sucursalAsignadaId(sucursalNorte.getId()).activo(true).build());
-            list.add(Usuario.builder().nombre("Andrés").apellido("Admin").correo("andres.admin@inventario.com")
-                    .contrasena(pass).rol(Rol.ADMIN).sucursalAsignadaId(sedePrincipal.getId()).activo(true).build());
-            list.add(Usuario.builder().nombre("Sofía").apellido("Comercial").correo("sofia.vendedor@inventario.com")
-                    .contrasena(pass).rol(Rol.MANAGER).sucursalAsignadaId(sucursalMedellin.getId()).activo(true).build());
-            list.add(Usuario.builder().nombre("Pedro").apellido("Logística").correo("pedro.almacen@inventario.com")
-                    .contrasena(pass).rol(Rol.OPERATOR).sucursalAsignadaId(sucursalNorte.getId()).activo(true).build());
+                // Admin de la sucursal
+                list.add(Usuario.builder()
+                        .nombre("Admin " + sId)
+                        .apellido(sucursal.getNombre())
+                        .correo("admin" + sId + "@inventario.com")
+                        .contrasena(pass)
+                        .rol(Rol.ADMIN)
+                        .sucursalAsignadaId(sucursal.getId())
+                        .activo(true)
+                        .build());
+                
+                // Gerente de la sucursal
+                list.add(Usuario.builder()
+                        .nombre("Gerente " + sId)
+                        .apellido(sucursal.getNombre())
+                        .correo("gerente" + sId + "@inventario.com")
+                        .contrasena(pass)
+                        .rol(Rol.MANAGER)
+                        .sucursalAsignadaId(sucursal.getId())
+                        .activo(true)
+                        .build());
+
+                // Operador de la sucursal
+                list.add(Usuario.builder()
+                        .nombre("Operador " + sId)
+                        .apellido(sucursal.getNombre())
+                        .correo("operador" + sId + "@inventario.com")
+                        .contrasena(pass)
+                        .rol(Rol.OPERATOR)
+                        .sucursalAsignadaId(sucursal.getId())
+                        .activo(true)
+                        .build());
+            }
 
             return userRepository.saveAll(list);
         }
@@ -445,14 +466,29 @@ public class DataInitializer implements CommandLineRunner {
 
     private void seedEnvios(List<Transferencia> transferencias, List<Transportista> trans, List<Ruta> ruts) {
         if (envioRepository.count() == 0 && !transferencias.isEmpty() && !trans.isEmpty() && !ruts.isEmpty()) {
-            for (int i = 0; i < 5; i++) {
-                envioRepository.save(Envio.builder()
-                        .transferencia(transferencias.get(i))
-                        .transportistaId(trans.get(i).getId())
-                        .rutaId(ruts.get(i).getId())
-                        .estado(EstadoLogistico.EN_TRANSITO)
-                        .fechaDespacho(LocalDateTime.now())
-                        .build());
+            for (int i = 0; i < transferencias.size(); i++) {
+                Transferencia t = transferencias.get(i);
+                EstadoLogistico estLog = null;
+                
+                if (EstadoTransferencia.APROBADO.name().equals(t.getEstado())) {
+                    estLog = EstadoLogistico.PREPARACION;
+                } else if (EstadoTransferencia.EN_TRANSITO.name().equals(t.getEstado())) {
+                    estLog = EstadoLogistico.EN_TRANSITO;
+                } else if (EstadoTransferencia.RECIBIDO.name().equals(t.getEstado())) {
+                    estLog = EstadoLogistico.RECIBIDO;
+                } else if (EstadoTransferencia.FALTANTES.name().equals(t.getEstado())) {
+                    estLog = EstadoLogistico.CON_FALTANTES;
+                }
+
+                if (estLog != null) {
+                    envioRepository.save(Envio.builder()
+                            .transferencia(t)
+                            .transportistaId(trans.get(i % trans.size()).getId())
+                            .rutaId(ruts.get(i % ruts.size()).getId())
+                            .estado(estLog)
+                            .fechaDespacho(LocalDateTime.now().minusDays(2))
+                            .build());
+                }
             }
         }
     }
@@ -460,14 +496,30 @@ public class DataInitializer implements CommandLineRunner {
     private List<Transferencia> seedTransferencias(List<Sucursal> sucs, List<Usuario> usus) {
         if (transferenciaRepository.count() == 0 && sucs.size() >= 2) {
             List<Transferencia> list = new ArrayList<>();
-            for (int i = 0; i < 5; i++) {
-                list.add(Transferencia.builder()
-                        .sucursalOrigenId(sucs.get(0).getId())
-                        .sucursalDestinoId(sucs.get(1).getId())
-                        .usuarioSolicitaId(usus.get(0).getId())
-                        .fechaSolicitud(LocalDateTime.now())
-                        .estado(EstadoLogistico.EN_TRANSITO.name())
-                        .build());
+            EstadoTransferencia[] estados = EstadoTransferencia.values();
+            int count = 0;
+            
+            for (EstadoTransferencia estado : estados) {
+                // 2 transferencias para cada etapa
+                for (int i = 0; i < 2; i++) {
+                    Sucursal origen = sucs.get(count % sucs.size());
+                    Sucursal destino = sucs.get((count + 1) % sucs.size());
+                    
+                    final Long destId = destino.getId();
+                    Usuario solicitante = usus.stream()
+                            .filter(u -> destId.equals(u.getSucursalAsignadaId()))
+                            .findFirst()
+                            .orElse(usus.get(0));
+
+                    list.add(Transferencia.builder()
+                            .sucursalOrigenId(origen.getId())
+                            .sucursalDestinoId(destino.getId())
+                            .usuarioSolicitaId(solicitante.getId())
+                            .fechaSolicitud(LocalDateTime.now().minusDays(15 - count))
+                            .estado(estado.name())
+                            .build());
+                    count++;
+                }
             }
             return transferenciaRepository.saveAll(list);
         }
@@ -477,8 +529,7 @@ public class DataInitializer implements CommandLineRunner {
     private void seedDetalleTransferencias(List<Transferencia> transfs, List<Producto> prods) {
         if (detalleTransferenciaRepository.count() == 0 && !transfs.isEmpty() && !prods.isEmpty()) {
             for (Transferencia t : transfs) {
-                // Transferimos los primeros 2 productos
-                for (int i = 0; i < Math.min(2, prods.size()); i++) {
+                for (int i = 0; i < Math.min(3, prods.size()); i++) {
                     detalleTransferenciaRepository.save(DetalleTransferencia.builder()
                             .transferencia(t)
                             .productoId(prods.get(i).getId())

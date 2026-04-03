@@ -9,7 +9,7 @@ import { InventarioService } from '../../servicios/inventario.service';
 import { UsuarioService } from '../../servicios/usuario.service';
 import { TokenService } from '../../servicios/token.service';
 import { InformacionTransferencia, InformacionProducto } from '../../modelo/informacionObjeto';
-import { TransferenciaCrearDTO, TransferenciaPrepararDTO, TransferenciaConfirmarEnvioDTO, TransferenciaRecepcionDTO } from '../../modelo/crearObjetos';
+import { TransferenciaCrearDTO, TransferenciaPrepararDTO, TransferenciaConfirmarEnvioDTO, TransferenciaRecepcionDTO, TransferenciaConfirmarEnvioConCambiosDTO } from '../../modelo/crearObjetos';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
 
 @Component({
@@ -374,16 +374,114 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
     }
   }
 
-  enviarTransferencia(t: InformacionTransferencia) {
-    Swal.fire({
+  async enviarTransferencia(t: InformacionTransferencia) {
+    let stockActual = 0;
+    let nombreProducto = 'Producto desconocido';
+    
+    // Obtener el stock actual en la sucursal de origen
+    if (t.items && t.items.length > 0) {
+      const idProducto = t.items[0].idProducto;
+      try {
+        const resp: any = await this.inventarioSvc.getProductByIdSucursal(t.idSucursalOrigen, idProducto).toPromise();
+        if (resp && resp.respuesta) {
+          stockActual = resp.respuesta.stock || 0;
+          nombreProducto = resp.respuesta.nombre || `ID: ${idProducto}`;
+        }
+      } catch (e) {
+        console.error('Error obteniendo stock del producto', e);
+      }
+    }
+
+    const cantidadAEnviarOriginal = t.items && t.items.length > 0 
+      ? (t.items[0].cantidadConfirmada || t.items[0].cantidadSolicitada) 
+      : 0;
+
+    const { value: formValues } = await Swal.fire({
       title: '¿Confirmar Envío?',
-      text: "Esto descontará el stock de la sucursal origen.",
+      html: `
+        <div style="text-align: left; font-size: 14px;">
+          <h4 style="margin-top: 0; color: #4f46e5; text-align: center;">Resumen de Transferencia</h4>
+          <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 15px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: center;">
+              <div><strong>ID Transferencia:</strong></div><div>#${t.idTransferencia}</div>
+              <div><strong>Destino:</strong></div><div>${this.getNombreSucursal(t.idSucursalDestino)}</div>
+              <div><strong>Producto:</strong></div><div>${nombreProducto}</div>
+              <div><strong>Cant. a Enviar:</strong></div>
+              <div>
+                <input id="swal-cant-enviar" type="number" class="swal2-input" style="margin: 0; width: 100%; height: 32px; font-size: 14px;" value="${cantidadAEnviarOriginal}">
+              </div>
+            </div>
+          </div>
+          
+          <div id="swal-stock-warning" style="background: ${stockActual >= cantidadAEnviarOriginal ? '#ecfdf5' : '#fef2f2'}; padding: 15px; border-radius: 8px; border: 1px solid ${stockActual >= cantidadAEnviarOriginal ? '#a7f3d0' : '#fecaca'};">
+             <div style="display: flex; justify-content: space-between; align-items: center;">
+               <span style="font-weight: bold; color: ${stockActual >= cantidadAEnviarOriginal ? '#065f46' : '#991b1b'};">Stock de tu Sucursal:</span>
+               <span style="font-size: 18px; font-weight: 800; color: ${stockActual >= cantidadAEnviarOriginal ? '#059669' : '#dc2626'};">${stockActual}</span>
+             </div>
+             <div id="swal-stock-msg-container">
+             ${stockActual < cantidadAEnviarOriginal ? `<div style="color: #dc2626; font-size: 12px; margin-top: 8px; font-weight: 600;">⚠️ Tienes menos stock del que vas a enviar.</div>` : ''}
+             </div>
+          </div>
+          <p style="margin-top: 15px; font-size: 13px; color: #6b7280; text-align: center;">Esta acción descontará el stock de tu inventario inmediatamente.</p>
+        </div>
+      `,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, enviar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
+      cancelButtonText: 'Cancelar',
+      didOpen: () => {
+        const inputCant = document.getElementById('swal-cant-enviar') as HTMLInputElement;
+        const warningDiv = document.getElementById('swal-stock-warning') as HTMLElement;
+        const msgContainer = document.getElementById('swal-stock-msg-container') as HTMLElement;
+
+        inputCant.addEventListener('input', () => {
+             const nuevaCant = Number(inputCant.value);
+             if (stockActual >= nuevaCant) {
+               warningDiv.style.background = '#ecfdf5';
+               warningDiv.style.borderColor = '#a7f3d0';
+               warningDiv.querySelector('span:first-child')!.setAttribute('style', 'font-weight: bold; color: #065f46;');
+               warningDiv.querySelector('span:last-child')!.setAttribute('style', 'font-size: 18px; font-weight: 800; color: #059669;');
+               msgContainer.innerHTML = '';
+             } else {
+               warningDiv.style.background = '#fef2f2';
+               warningDiv.style.borderColor = '#fecaca';
+               warningDiv.querySelector('span:first-child')!.setAttribute('style', 'font-weight: bold; color: #991b1b;');
+               warningDiv.querySelector('span:last-child')!.setAttribute('style', 'font-size: 18px; font-weight: 800; color: #dc2626;');
+               msgContainer.innerHTML = '<div style="color: #dc2626; font-size: 12px; margin-top: 8px; font-weight: 600;">⚠️ Tienes menos stock del que vas a enviar.</div>';
+             }
+        });
+      },
+      preConfirm: () => {
+        const cant = (document.getElementById('swal-cant-enviar') as HTMLInputElement).value;
+        if (!cant || Number(cant) <= 0) {
+          Swal.showValidationMessage('Ingresa una cantidad válida');
+          return false;
+        }
+        return {
+          cantidadAEnviarFinal: Number(cant)
+        };
+      }
+    });
+
+    if (formValues) {
+      if (formValues.cantidadAEnviarFinal !== cantidadAEnviarOriginal) {
+        // Enviar con cambios en la cantidad
+        const dtoCambios: TransferenciaConfirmarEnvioConCambiosDTO = {
+          idTransferencia: t.idTransferencia,
+          StockAceptadoEnvio: formValues.cantidadAEnviarFinal
+        };
+        this.svc.enviarConCambios(dtoCambios).subscribe({
+          next: () => {
+            Swal.fire('Enviado', 'La transferencia está en camino con la nueva cantidad', 'success');
+            this.cargar();
+          },
+          error: (err) => {
+            console.error(err);
+            Swal.fire('Error', err.error?.mensaje || 'No se pudo enviar', 'error');
+          }
+        });
+      } else {
+        // Enviar normal sin cambios
         const dto: TransferenciaConfirmarEnvioDTO = {
           idTransferencia: t.idTransferencia
         };
@@ -394,11 +492,11 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
           },
           error: (err) => {
             console.error(err);
-            Swal.fire('Error', 'No se pudo enviar', 'error');
+            Swal.fire('Error', err.error?.mensaje || 'No se pudo enviar', 'error');
           }
         });
       }
-    });
+    }
   }
 
   async recibirTransferencia(t: InformacionTransferencia) {

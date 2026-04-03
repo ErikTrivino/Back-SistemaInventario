@@ -1,5 +1,6 @@
 package com.inventory.controladores.transferencias;
 
+import com.inventory.modelo.dto.transferencias.TransferenciaConfirmarEnvioConCambiosDTO;
 import com.inventory.servicios.interfaces.transferencias.TransferenciaServicio;
 import com.inventory.modelo.dto.transferencias.*;
 import com.inventory.modelo.dto.comun.MensajeDTO;
@@ -33,6 +34,11 @@ public class TransferenciaControlador {
     @PutMapping("/enviar")
     public ResponseEntity<MensajeDTO<Object>> enviar(@Valid @RequestBody TransferenciaConfirmarEnvioDTO dto) {
         return ResponseEntity.ok(new MensajeDTO<>(false, transferService.shipTransfer(dto)));
+    }
+
+    @PutMapping("/enviarConCambios")
+    public ResponseEntity<MensajeDTO<Object>> enviarConCambios(@Valid @RequestBody TransferenciaConfirmarEnvioConCambiosDTO dto) {
+        return ResponseEntity.ok(new MensajeDTO<>(false, transferService.shipTransferConCambios(dto)));
     }
 
     /**

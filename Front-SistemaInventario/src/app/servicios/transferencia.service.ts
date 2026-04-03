@@ -7,6 +7,7 @@ import {
   TransferenciaCrearDTO,
   TransferenciaPrepararDTO,
   TransferenciaConfirmarEnvioDTO,
+  TransferenciaConfirmarEnvioConCambiosDTO,
   TransferenciaRecepcionDTO
 } from '../modelo/crearObjetos';
 
@@ -28,6 +29,10 @@ export class TransferenciaService {
 
   enviar(dto: TransferenciaConfirmarEnvioDTO): Observable<MensajeDTO> {
     return this.http.put<MensajeDTO>(`${this.apiUrl}/enviar`, dto);
+  }
+
+  enviarConCambios(dto: TransferenciaConfirmarEnvioConCambiosDTO): Observable<MensajeDTO> {
+    return this.http.put<MensajeDTO>(`${this.apiUrl}/enviarConCambios`, dto);
   }
 
   recibir(dto: TransferenciaRecepcionDTO): Observable<MensajeDTO> {

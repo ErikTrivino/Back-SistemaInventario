@@ -122,6 +122,45 @@ public class TransferenciaServicioImpl implements TransferenciaServicio {
 
     @Override
     @Transactional
+    public TransferenciaInformacionDTO shipTransferConCambios(TransferenciaConfirmarEnvioConCambiosDTO dto) {
+        Transferencia transfer = transferRepository.findById(dto.idTransferencia()).orElseThrow();
+
+        // Actualizamos la cantidad confirmada con el stock aceptado para el envío
+        for (DetalleTransferencia detalle : transfer.getDetalles()) {
+            detalle.setCantidadConfirmada(dto.StockAceptadoEnvio());
+            
+            inventoryService.updateStock(
+                    detalle.getProductoId(),
+                    transfer.getSucursalOrigenId(),
+                    dto.StockAceptadoEnvio().doubleValue(),
+                    "OUT",
+                    "Salida por Transferencia #" + transfer.getId(),
+                    transfer.getUsuarioSolicitaId() != null
+                        ? transfer.getUsuarioSolicitaId().toString()
+                        : "sistema");
+        }
+
+        // Crear registro de envío (Logística)
+        Envio envio = Envio.builder()
+                .transferencia(transfer)
+                .fechaDespacho(LocalDateTime.now())
+                .estado(com.inventory.modelo.enums.EstadoLogistico.EN_TRANSITO)
+                .build();
+
+        transfer.setEnvio(envio);
+        transfer.setEstado(EstadoTransferencia.EN_TRANSITO.name());
+        Transferencia savedShip = transferRepository.save(transfer);
+
+        auditService.registrarAccion("1", "SHIP_TRANSFER_CHANGES", "Transferencia", savedShip.getId(), "Mercancía en tránsito con cambios");
+        eventPublisher.publicarTransferenciaCreada(savedShip,
+                transfer.getUsuarioSolicitaId() != null
+                    ? transfer.getUsuarioSolicitaId().toString()
+                    : "sistema");
+        return toInfo(savedShip);
+    }
+
+    @Override
+    @Transactional
     public TransferenciaInformacionDTO receiveTransfer(TransferenciaRecepcionDTO dto) {
         Transferencia transfer = transferRepository.findById(dto.idTransferencia()).orElseThrow();
 
