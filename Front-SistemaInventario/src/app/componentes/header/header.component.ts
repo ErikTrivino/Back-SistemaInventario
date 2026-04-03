@@ -1,12 +1,114 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TokenService } from '../../servicios/token.service';
+import { UsuarioService } from '../../servicios/usuario.service';
+import { TransferenciaService } from '../../servicios/transferencia.service';
+import { CompraService } from '../../servicios/compra.service';
+import { MensajeDTO } from '../../modelo/mensaje-dto';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
+
+  notificacionesCount = 0;
+  transferenciasCount = 0;
+  comprasCount = 0;
+  sucursalId = 0;
+
+  constructor(
+    private tokenSvc: TokenService,
+    private usuarioSvc: UsuarioService,
+    private transferenciaSvc: TransferenciaService,
+    private compraSvc: CompraService
+  ) { }
+
+  ngOnInit(): void {
+    if (this.tokenSvc.isLogged()) {
+      const userId = Number(this.tokenSvc.getIDCuenta());
+      if (userId) {
+        this.usuarioSvc.consultarPorId(userId).subscribe({
+          next: (res: MensajeDTO) => {
+            this.sucursalId = res.respuesta?.sucursalAsignadaId;
+            if (this.sucursalId) {
+              this.verificarPendientes();
+            }
+          }
+        });
+      }
+    }
+  }
+
+  verificarPendientes(): void {
+    this.transferenciasCount = 0;
+    this.comprasCount = 0;
+
+    // 1. Transferencias EN_TRANSITO (entrantes)
+    this.transferenciaSvc.getEntrantes(this.sucursalId, 'EN_TRANSITO').subscribe({
+      next: (res: MensajeDTO) => {
+        const data = res.respuesta;
+        this.transferenciasCount += (data?.totalElements || data?.length || 0);
+        this.actualizarTotal();
+      }
+    });
+
+    // 2. Transferencias SOLICITADO (salientes por preparar)
+    this.transferenciaSvc.getHistorico(this.sucursalId, 'SOLICITADO').subscribe({
+      next: (res: MensajeDTO) => {
+        const data = res.respuesta;
+        this.transferenciasCount += (data?.totalElements || data?.length || 0);
+        this.actualizarTotal();
+      }
+    });
+
+    // 3. Compras PENDIENTE
+    this.compraSvc.obtenerHistorico(undefined, undefined, 'PENDIENTE', this.sucursalId).subscribe({
+      next: (res: MensajeDTO) => {
+        const data = res.respuesta;
+        this.comprasCount = (data?.totalElements || data?.length || 0);
+        this.actualizarTotal();
+      }
+    });
+  }
+
+  actualizarTotal(): void {
+    this.notificacionesCount = this.transferenciasCount + this.comprasCount;
+  }
+
+  revisar(): void {
+    if (this.notificacionesCount > 0) {
+      let mensaje = 'Tienes las siguientes tareas pendientes: <br><br>';
+      if (this.transferenciasCount > 0) {
+        mensaje += `<b>Transferencias:</b> ${this.transferenciasCount}<br>`;
+      }
+      if (this.comprasCount > 0) {
+        mensaje += `<b>Compras:</b> ${this.comprasCount}<br>`;
+      }
+
+      Swal.fire({
+        title: 'Tareas Pendientes',
+        html: mensaje,
+        icon: 'info',
+        confirmButtonText: 'Entendido'
+      }).then(() => {
+        this.notificacionesCount = 0;
+        this.transferenciasCount = 0;
+        this.comprasCount = 0;
+      });
+    } else {
+      Swal.fire({
+        title: 'Sin Pendientes',
+        text: 'No tienes tareas pendientes en esta sucursal.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    }
+  }
 
 }
