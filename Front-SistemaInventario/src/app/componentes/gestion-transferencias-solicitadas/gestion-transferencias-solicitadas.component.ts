@@ -8,8 +8,9 @@ import { SucursalService } from '../../servicios/sucursal.service';
 import { InventarioService } from '../../servicios/inventario.service';
 import { UsuarioService } from '../../servicios/usuario.service';
 import { TokenService } from '../../servicios/token.service';
-import { InformacionTransferencia, InformacionProducto } from '../../modelo/informacionObjeto';
-import { TransferenciaCrearDTO, TransferenciaPrepararDTO, TransferenciaConfirmarEnvioDTO, TransferenciaRecepcionDTO, TransferenciaConfirmarEnvioConCambiosDTO } from '../../modelo/crearObjetos';
+import { TransportistaService } from '../../servicios/transportista.service';
+import { InformacionTransferencia, InformacionProducto, InformacionTransportistaDTO } from '../../modelo/informacionObjeto';
+import { TransferenciaCrearDTO, TransferenciaPrepararDTO, TransferenciaConfirmarEnvioDTO, TransferenciaRecepcionDTO, TransferenciaConfirmarEnvioConCambiosDTO, ClasificacionRuta } from '../../modelo/crearObjetos';
 import { TransferenciaCancelarDTO } from '../../modelo/editarObjeto';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
 
@@ -55,7 +56,8 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
     private inventarioSvc: InventarioService,
     private sucursalSvc: SucursalService,
     private usuarioSvc: UsuarioService,
-    private tokenSvc: TokenService
+    private tokenSvc: TokenService,
+    private transportistaSvc: TransportistaService
   ) { }
 
   ngOnInit(): void {
@@ -69,8 +71,9 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
           this.sucursalUsuario = usuario?.sucursalAsignadaId ?? 0;
           this.branchIdSeleccionada = this.sucursalUsuario;
 
-          // Cargar sucursales y luego el histórico
+          // Cargar sucursales, transportistas y luego el histórico
           this.cargarSucursales();
+          this.cargarTransportistas();
         },
         error: (err) => {
           console.error('Error obteniendo usuario', err);
@@ -95,6 +98,20 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
       error: (err) => {
         console.error('Error cargando sucursales', err);
         this.cargar();
+      }
+    });
+  }
+
+  transportistas: InformacionTransportistaDTO[] = [];
+
+  cargarTransportistas(): void {
+    this.transportistaSvc.listarTransportistas().subscribe({
+      next: (data) => {
+        this.transportistas = data.respuesta ?? [];
+        console.log(this.transportistas);
+      },
+      error: (err) => {
+        console.error('Error cargando transportistas', err);
       }
     });
   }
@@ -339,37 +356,72 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
   }
 
   async prepararTransferencia(t: InformacionTransferencia) {
-    // Buscar la cantidad solicitada del primer item como sugerencia
-    const cantSol = t.items && t.items.length > 0 ? t.items[0].cantidadSolicitada : '';
+    const cantSol = t.items && t.items.length > 0 ? t.items[0].cantidadSolicitada : 1;
 
-    const { value: cantidad } = await Swal.fire({
+    const { value: formValues } = await Swal.fire({
       title: 'Preparar Transferencia',
-      input: 'number',
-      inputLabel: 'Cantidad Confirmada',
-      inputValue: cantSol,
+      html: `
+        <div style="text-align: left; display: flex; flex-direction: column; gap: 16px; padding: 4px 2px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-weight: 600; font-size: 13px;">Cantidad Confirmada</label>
+            <input id="swal-prep-cant" class="swal2-input" type="number" step="0.01" value="${cantSol}" style="margin: 0; width: 100%;">
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-weight: 600; font-size: 13px;">Clasificación de Ruta</label>
+            <select id="swal-prep-clasif" class="swal2-input" style="margin: 0; width: 100%;">
+              <option value="PRIORIDAD">PRIORIDAD (Entrega rápida)</option>
+              <option value="COSTO">COSTO (Ahorro transporte)</option>
+              <option value="TIEMPO">TIEMPO (Optimización horario)</option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-weight: 600; font-size: 13px;">Lead Time Estándar (días)</label>
+            <input id="swal-prep-lead" class="swal2-input" type="number" placeholder="Ej: 2" value="2" style="margin: 0; width: 100%;">
+          </div>
+        </div>
+      `,
       showCancelButton: true,
-      inputValidator: (value) => {
-        if (!value || Number(value) < 1) {
-          return 'Debes ingresar una cantidad válida';
+      confirmButtonText: 'Preparar',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        const cant = (document.getElementById('swal-prep-cant') as HTMLInputElement).value;
+        const clasif = (document.getElementById('swal-prep-clasif') as HTMLSelectElement).value;
+        const lead = (document.getElementById('swal-prep-lead') as HTMLInputElement).value;
+
+        if (!cant || Number(cant) <= 0) {
+          Swal.showValidationMessage('Ingresa una cantidad válida');
+          return false;
         }
-        return null; // Return null when valid! TypeScript wants either string | null
+        if (!lead || Number(lead) < 1) {
+          Swal.showValidationMessage('Ingresa un lead time válido');
+          return false;
+        }
+        return {
+          cantidadConfirmada: Number(cant),
+          tipoClasificacion: clasif as ClasificacionRuta,
+          leadTimeEstandar: Number(lead)
+        };
       }
     });
 
-    if (cantidad) {
+    if (formValues) {
       const dto: TransferenciaPrepararDTO = {
         idTransferencia: t.idTransferencia,
-        cantidadConfirmada: Number(cantidad)
+        cantidadConfirmada: formValues.cantidadConfirmada,
+        tipoClasificacion: formValues.tipoClasificacion,
+        leadTimeEstandar: formValues.leadTimeEstandar
       };
 
       this.svc.preparar(dto).subscribe({
         next: () => {
-          Swal.fire('Éxito', 'Transferencia preparada', 'success');
+          Swal.fire('Éxito', 'Transferencia preparada y ruta establecida', 'success');
           this.cargar();
         },
         error: (err) => {
           console.error(err);
-          Swal.fire('Error', 'Hubo un error', 'error');
+          Swal.fire('Error', err.error?.mensaje || 'Hubo un error al preparar la transferencia', 'error');
         }
       });
     }
@@ -429,6 +481,89 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
             <input id="swal-tiempo-estimado" class="swal2-input" type="number" placeholder="Ej: 3" style="margin: 0; width: 100%; height: 38px;">
           </div>
 
+          <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-weight: 600; font-size: 13px;">Transportista</label>
+            
+            <!-- Buscador Transportista -->
+            <div style="position: relative;">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9ca3af;z-index:10;">🔍</span>
+              <input
+                id="swal-buscar-trans"
+                class="swal2-input"
+                type="text"
+                placeholder="Buscar transportista..."
+                style="margin: 0; width: 100%; padding-left: 32px; height: 38px; font-size: 14px;"
+                oninput="
+                  const q = this.value.toLowerCase();
+                  document.querySelectorAll('.trans-row').forEach(r => {
+                    const txt = r.innerText.toLowerCase();
+                    r.style.display = txt.includes(q) ? '' : 'none';
+                  });
+                "
+              >
+            </div>
+
+            <!-- Lista de transportistas -->
+            <div id="swal-trans-list" style="
+              max-height: 140px;
+              overflow-y: auto;
+              border: 1px solid #e5e7eb;
+              border-radius: 10px;
+              padding: 4px;
+              display: flex;
+              flex-direction: column;
+              gap: 2px;
+              background: #fafafa;
+            ">
+              ${this.transportistas.filter(trans => trans.activo).map(trans => `
+                <div
+                  class="trans-row"
+                  data-id="${trans.id}"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 8px 10px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    border: 2px solid transparent;
+                    transition: all 0.2s;
+                  "
+                  onmouseover="this.style.background='#f3f4f6'"
+                  onmouseout="if(!this.classList.contains('selected'))this.style.background=''"
+                  onclick="
+                    document.querySelectorAll('.trans-row').forEach(r=>{
+                      r.classList.remove('selected');
+                      r.style.borderColor='transparent';
+                      r.style.background='';
+                      r.style.boxShadow='none';
+                    });
+                    this.classList.add('selected');
+                    this.style.borderColor='#3b82f6';
+                    this.style.background='#eff6ff';
+                    this.style.boxShadow='0 2px 4px rgba(59, 130, 246, 0.1)';
+                    document.getElementById('swal-id-transportista').value='${trans.id}';
+                  "
+                >
+                  <div style="
+                    width: 32px; height: 32px;
+                    border-radius: 8px;
+                    background: #dbeafe;
+                    display: flex; align-items: center; justify-content: center;
+                    color: #1e40af; font-weight: 700; font-size: 12px;
+                  ">${trans.nombre.charAt(0).toUpperCase()}</div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 600; font-size: 13px; color: #1f2937; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${trans.nombre}</div>
+                    <div style="font-size: 11px; color: #6b7280;">NIT: ${trans.nit}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- ID oculto del transportista seleccionado -->
+            <input id="swal-id-transportista" type="hidden" value="">
+          </div>
+
           <p style="margin-top: 15px; font-size: 13px; color: #6b7280; text-align: center;">Esta acción descontará el stock de tu inventario inmediatamente.</p>
         </div>
       `,
@@ -461,6 +596,7 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
       preConfirm: () => {
         const cant = (document.getElementById('swal-cant-enviar') as HTMLInputElement).value;
         const tiempo = (document.getElementById('swal-tiempo-estimado') as HTMLInputElement).value;
+        const transportistaId = (document.getElementById('swal-id-transportista') as HTMLInputElement).value;
 
         if (!cant || Number(cant) <= 0) {
           Swal.showValidationMessage('Ingresa una cantidad válida');
@@ -472,9 +608,15 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
           return false;
         }
 
+        if (!transportistaId) {
+          Swal.showValidationMessage('Debes seleccionar un transportista');
+          return false;
+        }
+
         return {
           cantidadAEnviarFinal: Number(cant),
-          tiempoEstimadoEntrega: Number(tiempo)
+          tiempoEstimadoEntrega: Number(tiempo),
+          idTransportista: Number(transportistaId)
         };
       }
     });
@@ -484,7 +626,9 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
         // Enviar con cambios en la cantidad
         const dtoCambios: TransferenciaConfirmarEnvioConCambiosDTO = {
           idTransferencia: t.idTransferencia,
-          StockAceptadoEnvio: formValues.cantidadAEnviarFinal
+          StockAceptadoEnvio: formValues.cantidadAEnviarFinal,
+          tiempoEstimadoEntrega: formValues.tiempoEstimadoEntrega,
+          idTransportista: formValues.idTransportista
         };
         this.svc.enviarConCambios(dtoCambios).subscribe({
           next: () => {
@@ -500,7 +644,8 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
         // Enviar normal sin cambios
         const dto: TransferenciaConfirmarEnvioDTO = {
           idTransferencia: t.idTransferencia,
-          tiempoEstimadoEntrega: formValues.tiempoEstimadoEntrega
+          tiempoEstimadoEntrega: formValues.tiempoEstimadoEntrega,
+          idTransportista: formValues.idTransportista
         };
         this.svc.enviar(dto).subscribe({
           next: () => {

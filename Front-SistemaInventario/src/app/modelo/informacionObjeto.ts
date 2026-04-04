@@ -245,3 +245,11 @@ export enum TipoMovimiento {
   AJUSTE = 'AJUSTE',
   MERMA = 'MERMA'
 }
+
+export interface InformacionTransportistaDTO {
+  id: number;
+  nombre: string;
+  contacto: string;
+  nit: string;
+  activo: boolean;
+}

@@ -1,6 +1,7 @@
 package com.inventory.modelo.entidades.transferencias;
 
 import com.inventory.modelo.entidades.logistica.Envio;
+import com.inventory.modelo.entidades.logistica.Ruta;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -51,4 +52,8 @@ public class Transferencia {
     /** Información logística asociada al envío de esta transferencia. */
     @OneToOne(mappedBy = "transferencia", cascade = CascadeType.ALL)
     private Envio envio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_ruta")
+    private Ruta ruta;
 }

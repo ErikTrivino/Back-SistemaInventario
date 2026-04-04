@@ -77,19 +77,35 @@ export interface TransferenciaCrearDTO {
   items: ItemTransferenciaDTO[];
 }
 
+export enum ClasificacionRuta {
+  /** Prioridad alta de despacho y entrega. */
+  PRIORIDAD = 'PRIORIDAD',
+
+  /** Optimización de costos de transporte. */
+  COSTO = 'COSTO',
+
+  /** Optimización de tiempos de entrega. */
+  TIEMPO = 'TIEMPO'
+}
+
 export interface TransferenciaPrepararDTO {
   idTransferencia: number;
   cantidadConfirmada: number;
+  tipoClasificacion?: ClasificacionRuta;
+  leadTimeEstandar?: number;
 }
 
 export interface TransferenciaConfirmarEnvioDTO {
   idTransferencia: number;
   tiempoEstimadoEntrega: number;
+  idTransportista: number;
 }
 
 export interface TransferenciaConfirmarEnvioConCambiosDTO {
   idTransferencia: number;
   StockAceptadoEnvio: number;
+  tiempoEstimadoEntrega: number;
+  idTransportista: number;
 }
 
 export interface TransferenciaRecepcionDTO {

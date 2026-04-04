@@ -4,5 +4,6 @@ import jakarta.validation.constraints.NotNull;
 
 public record TransferenciaConfirmarEnvioDTO(
         @NotNull Long idTransferencia,
-        Integer tiempoEstimadoEntrega
+        Integer tiempoEstimadoEntrega,
+        long idTransportista
 ) {}

@@ -7,7 +7,9 @@ import java.math.BigDecimal;
 public record TransferenciaConfirmarEnvioConCambiosDTO(
 
         @NotNull Long idTransferencia,
-        BigDecimal StockAceptadoEnvio
+        BigDecimal StockAceptadoEnvio,
+        Integer tiempoEstimadoEntrega,
+        long idTransportista
 
 ) {
 }
