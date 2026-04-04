@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { MensajeDTO } from '../modelo/mensaje-dto';
 import { environment } from '../../environments/environment';
-import { CrearProducto } from '../modelo/crearObjetos';
+import { ProductoCrearDTO } from '../modelo/crearObjetos';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +14,7 @@ export class InventarioService {
   constructor(private http: HttpClient) { }
 
   // Productos
-  createProduct(dto: CrearProducto): Observable<MensajeDTO> {
+  createProduct(dto: ProductoCrearDTO): Observable<MensajeDTO> {
     return this.http.post<MensajeDTO>(`${this.apiUrl}/productos`, dto);
   }
 

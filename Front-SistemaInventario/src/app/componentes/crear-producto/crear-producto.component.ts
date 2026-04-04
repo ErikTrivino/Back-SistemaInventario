@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
 import { InventarioService } from '../../servicios/inventario.service';
 import { SucursalService } from '../../servicios/sucursal.service';
 import { ProveedorService } from '../../servicios/proveedor.service';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
+import { ProductoCrearDTO } from '../../modelo/crearObjetos';
 
 @Component({
   selector: 'app-crear-producto',
@@ -29,13 +30,35 @@ export class CrearProductoComponent implements OnInit {
       descripcion: [''],
       sku: ['', [Validators.maxLength(50)]],
       unidadMedidaBase: ['UND', Validators.required],
-      precioCostoPromedio: [0, [Validators.required, Validators.min(0)]],
       activo: [true],
-      cantidadInicial: [0, [Validators.required, Validators.min(0)]],
-      idSucursal: [1, Validators.required], // Por defecto sucursal 1 (Central)
       idProveedor: [null, Validators.required],
-      cantidadMinima: [0, [Validators.required, Validators.min(0)]]
+      detalleProdcutoCrearDTO: this.fb.array([this.crearDetalleFormGroup()])
     });
+  }
+
+  get detalles(): FormArray {
+    return this.form.get('detalleProdcutoCrearDTO') as FormArray;
+  }
+
+  crearDetalleFormGroup(): FormGroup {
+    return this.fb.group({
+      precioCostoPromedio: [0, [Validators.required, Validators.min(0)]],
+      cantidadInicial: [0, [Validators.required, Validators.min(0)]],
+      cantidadMinima: [0, [Validators.required, Validators.min(0)]],
+      idSucursal: [1, Validators.required]
+    });
+  }
+
+  agregarDetalle(): void {
+    this.detalles.push(this.crearDetalleFormGroup());
+  }
+
+  eliminarDetalle(index: number): void {
+    if (this.detalles.length > 1) {
+      this.detalles.removeAt(index);
+    } else {
+      Swal.fire('Atención', 'Debe haber al menos un detalle de inventario', 'warning');
+    }
   }
 
   ngOnInit(): void {
@@ -73,14 +96,20 @@ export class CrearProductoComponent implements OnInit {
 
   crear(): void {
     if (this.form.valid) {
-      const dto = {
-        ...this.form.value,
-        precioCostoPromedio: Number(this.form.value.precioCostoPromedio),
-        cantidadInicial: Number(this.form.value.cantidadInicial),
-        cantidadMinima: Number(this.form.value.cantidadMinima),
+      const dto: ProductoCrearDTO = {
+        nombre: this.form.value.nombre,
+        descripcion: this.form.value.descripcion,
+        sku: this.form.value.sku,
+        unidadMedidaBase: this.form.value.unidadMedidaBase,
         activo: this.form.value.activo,
         idProveedor: Number(this.form.value.idProveedor),
-        idSucursal: Number(this.form.value.idSucursal)
+        detalleProdcutoCrearDTO: this.form.value.detalleProdcutoCrearDTO.map((det: any) => ({
+          ...det,
+          precioCostoPromedio: Number(det.precioCostoPromedio),
+          cantidadInicial: Number(det.cantidadInicial),
+          cantidadMinima: Number(det.cantidadMinima),
+          idSucursal: Number(det.idSucursal)
+        }))
       };
 
       console.log(dto);
@@ -88,13 +117,18 @@ export class CrearProductoComponent implements OnInit {
         next: (data: MensajeDTO) => {
           Swal.fire('Éxito', 'Producto creado correctamente', 'success');
           this.form.reset({
+            nombre: '',
+            descripcion: '',
+            sku: '',
             unidadMedidaBase: 'UND',
-            idSucursal: 1,
-            activo: true,
-            precioCostoPromedio: 0,
-            cantidadInicial: 0,
-            cantidadMinima: 0
+            idProveedor: null,
+            activo: true
           });
+          // Limpiar FormArray y dejar uno solo
+          while (this.detalles.length !== 0) {
+            this.detalles.removeAt(0);
+          }
+          this.detalles.push(this.crearDetalleFormGroup());
         },
         error: (err: any) => {
           console.error(err);

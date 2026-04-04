@@ -1,5 +1,20 @@
 
+export interface DetalleProductoCrearDTO {
+  precioCostoPromedio: number;
+  cantidadInicial: number;
+  cantidadMinima: number;
+  idSucursal: number;
+}
 
+export interface ProductoCrearDTO {
+  nombre: string;
+  descripcion?: string;
+  sku?: string;
+  unidadMedidaBase: string;
+  activo: boolean;
+  idProveedor?: number;
+  detalleProdcutoCrearDTO: DetalleProductoCrearDTO[];
+}
 
 
 
@@ -18,19 +33,7 @@ export interface CrearUsuario {
 
 
 
-export interface CrearProducto {
 
-  nombre: string;
-  descripcion: string;
-  sku: string;
-  unidadMedidaBase: string;
-  precioCostoPromedio: number;
-  cantidadInicial: number;
-  cantidadMinima: number;
-  idSucursal: number;
-  activo?: boolean;
-
-}
 
 export interface CrearProveedor {
 

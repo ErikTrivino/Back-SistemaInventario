@@ -14,6 +14,8 @@ import com.inventory.modelo.entidades.proveedores.ProductoProveedor;
 import com.inventory.modelo.entidades.inventario.Inventario;
 import com.inventory.modelo.entidades.inventario.MovimientoInventario;
 import com.inventory.modelo.entidades.inventario.TipoMovimiento;
+import com.inventory.repositorios.nucleo.SucursalRepositorio;
+import com.inventory.modelo.entidades.nucleo.Sucursal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Collections;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -32,17 +39,25 @@ public class InventarioServicioImpl implements InventarioServicio {
     private final AuditoriaServicio auditService;
     private final PublicadorEventos eventPublisher;
     private final ProductoProveedorRepositorio productProviderRepository;
+    private final SucursalRepositorio sucursalRepository;
 
     @Override
     @Transactional
     public ProductoDetalleDTO createProduct(ProductoCrearDTO dto) {
+        java.math.BigDecimal costBase = java.math.BigDecimal.ZERO;
+        if (dto.detalleProdcutoCrearDTO() != null && !dto.detalleProdcutoCrearDTO().isEmpty()) {
+            costBase = dto.detalleProdcutoCrearDTO().get(0).precioCostoPromedio() == null
+                    ? java.math.BigDecimal.ZERO
+                    : dto.detalleProdcutoCrearDTO().get(0).precioCostoPromedio();
+        }
+
         Producto product = Producto.builder()
                 .nombre(dto.nombre())
                 .descripcion(dto.descripcion())
                 .sku(dto.sku())
                 .unidadMedidaBase(dto.unidadMedidaBase())
-                .precioCostoPromedio(
-                        dto.precioCostoPromedio() == null ? java.math.BigDecimal.ZERO : dto.precioCostoPromedio())
+                .precioCostoPromedio(costBase)
+                .activo(dto.activo())
                 .build();
         Producto saved = productRepository.save(product);
 
@@ -59,29 +74,47 @@ public class InventarioServicioImpl implements InventarioServicio {
             log.warn("No se proporcionó idProveedor para el producto: {}", saved.getNombre());
         }
 
-        if (dto.cantidadInicial() != null && dto.cantidadInicial().compareTo(java.math.BigDecimal.ZERO) > 0
-                && dto.idSucursal() != null) {
-            com.inventory.modelo.entidades.nucleo.Sucursal sucursal = com.inventory.modelo.entidades.nucleo.Sucursal
-                    .builder().id(dto.idSucursal()).build();
+        // Inicializar inventario en todas las sucursales
+        List<Sucursal> todasLasSucursales = sucursalRepository.findAll();
+        Map<Long, DetalleProdcutoCrearDTO> detallesMap = dto.detalleProdcutoCrearDTO() != null
+                ? dto.detalleProdcutoCrearDTO().stream()
+                        .filter(d -> d.idSucursal() != null)
+                        .collect(Collectors.toMap(DetalleProdcutoCrearDTO::idSucursal, d -> d))
+                : Collections.emptyMap();
+
+        for (Sucursal sucursal : todasLasSucursales) {
+            DetalleProdcutoCrearDTO detail = detallesMap.get(sucursal.getId());
+
+            BigDecimal stock = BigDecimal.ZERO;
+            BigDecimal stockMinimo = BigDecimal.ZERO;
+            boolean activo = false;
+
+            if (detail != null) {
+                stock = detail.cantidadInicial() == null ? BigDecimal.ZERO : detail.cantidadInicial();
+                stockMinimo = detail.cantidadMinima() == null ? BigDecimal.ZERO : detail.cantidadMinima();
+                activo = dto.activo();
+            }
 
             Inventario inventario = Inventario.builder()
                     .producto(saved)
                     .sucursal(sucursal)
-                    .stock(dto.cantidadInicial())
-                    .stockMinimo(dto.cantidadMinima() == null ? java.math.BigDecimal.ZERO : dto.cantidadMinima())
-                    .activo(dto.activo())
+                    .stock(stock)
+                    .stockMinimo(stockMinimo)
+                    .activo(activo)
                     .build();
             inventoryRepository.save(inventario);
 
-            MovimientoInventario movement = MovimientoInventario.builder()
-                    .tipo(TipoMovimiento.ENTRADA_COMPRA)
-                    .cantidad(dto.cantidadInicial())
-                    .fechaMovimiento(LocalDateTime.now())
-                    .sucursalId(dto.idSucursal())
-                    .productoId(saved.getId())
-                    .motivo("Inventario inicial")
-                    .build();
-            movementRepository.save(movement);
+            if (detail != null && stock.compareTo(BigDecimal.ZERO) > 0) {
+                MovimientoInventario movement = MovimientoInventario.builder()
+                        .tipo(TipoMovimiento.ENTRADA_COMPRA)
+                        .cantidad(stock)
+                        .fechaMovimiento(LocalDateTime.now())
+                        .sucursalId(sucursal.getId())
+                        .productoId(saved.getId())
+                        .motivo("Inventario inicial")
+                        .build();
+                movementRepository.save(movement);
+            }
         }
 
         auditService.registrarAccion("1", "CREATE", "Producto", saved.getId(), "Created product");

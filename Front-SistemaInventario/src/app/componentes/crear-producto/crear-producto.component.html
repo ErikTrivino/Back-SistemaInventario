@@ -40,17 +40,7 @@
     <div class="invalid-feedback">Seleccione una unidad de medida.</div>
   </div>
 
-  <!-- Precio Costo Promedio -->
-  <div class="mb-3">
-    <label class="form-label fw-semibold">Precio Costo Promedio <span class="text-danger">*</span></label>
-    <div class="input-group">
-      <span class="input-group-text">$</span>
-      <input formControlName="precioCostoPromedio" type="number" step="0.01" min="0" class="form-control"
-        [class.is-invalid]="form.get('precioCostoPromedio')?.invalid && form.get('precioCostoPromedio')?.touched"
-        placeholder="0.00" />
-      <div class="invalid-feedback">Ingrese un precio válido (≥ 0).</div>
-    </div>
-  </div>
+
 
   <!-- Activo -->
   <div class="mb-3">
@@ -62,37 +52,73 @@
   </div>
 
   <hr class="my-4" />
-  <h6 class="text-muted mb-3">Inventario Inicial</h6>
-
-  <!-- Cantidad Inicial -->
-  <div class="mb-3">
-    <label class="form-label fw-semibold">Cantidad Inicial <span class="text-danger">*</span></label>
-    <input formControlName="cantidadInicial" type="number" min="0" class="form-control"
-      [class.is-invalid]="form.get('cantidadInicial')?.invalid && form.get('cantidadInicial')?.touched"
-      placeholder="0" />
-    <div class="invalid-feedback">Ingrese una cantidad válida (≥ 0).</div>
-  </div>
-  <!-- Cantidad minima -->
-  <div class="mb-3">
-    <label class="form-label fw-semibold">Cantidad Minima <span class="text-danger">*</span></label>
-    <input formControlName="cantidadMinima" type="number" min="0" class="form-control"
-      [class.is-invalid]="form.get('cantidadMinima')?.invalid && form.get('cantidadMinima')?.touched" placeholder="0" />
-    <div class="invalid-feedback">Ingrese una cantidad mínima válida (≥ 0).</div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="text-muted mb-0">Inventario Inicial por Sucursal</h6>
+    <button type="button" class="btn btn-sm btn-outline-primary" (click)="agregarDetalle()">
+      <i class="fas fa-plus-circle me-1"></i> Agregar Sucursal
+    </button>
   </div>
 
-  <!-- Sucursal -->
-  <div class="mb-3">
-    <label class="form-label fw-semibold">Sucursal <span class="text-danger">*</span></label>
-    <select formControlName="idSucursal" class="form-select"
-      [class.is-invalid]="form.get('idSucursal')?.invalid && form.get('idSucursal')?.touched">
-      <option value="">-- Seleccione una sucursal --</option>
-      <option *ngFor="let suc of sucursales" [value]="suc.id">{{ suc.nombre }}</option>
-    </select>
-    <div class="invalid-feedback">Seleccione una sucursal válida.</div>
+  <div formArrayName="detalleProdcutoCrearDTO">
+    <div *ngFor="let det of detalles.controls; let i = index" [formGroupName]="i" class="card mb-3 border-0 shadow-sm">
+      <div class="card-body bg-light rounded shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="badge bg-secondary">Sucursal #{{ i + 1 }}</span>
+          <button *ngIf="detalles.length > 1" type="button" class="btn btn-sm btn-outline-danger border-0"
+            (click)="eliminarDetalle(i)">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+
+        <div class="row g-3">
+          <!-- Sucursal -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Sucursal <span class="text-danger">*</span></label>
+            <select formControlName="idSucursal" class="form-select"
+              [class.is-invalid]="$any(det).get('idSucursal')?.invalid && $any(det).get('idSucursal')?.touched">
+              <option value="">-- Seleccione --</option>
+              <option *ngFor="let suc of sucursales" [value]="suc.id">{{ suc.nombre }}</option>
+            </select>
+            <div class="invalid-feedback">Seleccione una sucursal válida.</div>
+          </div>
+
+          <!-- Precio Costo Promedio -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Costo Promedio <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input formControlName="precioCostoPromedio" type="number" step="0.01" min="0" class="form-control"
+                [class.is-invalid]="$any(det).get('precioCostoPromedio')?.invalid && $any(det).get('precioCostoPromedio')?.touched"
+                placeholder="0.00" />
+            </div>
+            <div *ngIf="$any(det).get('precioCostoPromedio')?.invalid && $any(det).get('precioCostoPromedio')?.touched"
+              class="text-danger small mt-1">Ingrese un precio válido.</div>
+          </div>
+
+          <!-- Cantidad Inicial -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Cantidad Inicial <span class="text-danger">*</span></label>
+            <input formControlName="cantidadInicial" type="number" min="0" class="form-control"
+              [class.is-invalid]="$any(det).get('cantidadInicial')?.invalid && $any(det).get('cantidadInicial')?.touched"
+              placeholder="0" />
+            <div class="invalid-feedback">Mínimo 0.</div>
+          </div>
+
+          <!-- Cantidad minima -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Cantidad Mínima <span class="text-danger">*</span></label>
+            <input formControlName="cantidadMinima" type="number" min="0" class="form-control"
+              [class.is-invalid]="$any(det).get('cantidadMinima')?.invalid && $any(det).get('cantidadMinima')?.touched"
+              placeholder="0" />
+            <div class="invalid-feedback">Mínimo 0.</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Proveedor -->
-  <div class="mb-3">
+  <div class="mb-3 mt-4">
     <label class="form-label fw-semibold">Proveedor <span class="text-danger">*</span></label>
     <select formControlName="idProveedor" class="form-select"
       [class.is-invalid]="form.get('idProveedor')?.invalid && form.get('idProveedor')?.touched">
@@ -103,8 +129,6 @@
     </select>
     <div class="invalid-feedback">Seleccione un proveedor válido.</div>
   </div>
-
-
 
   <div class="d-flex gap-2 mt-4">
     <button class="btn btn-primary" type="submit" [disabled]="form.invalid">Crear Producto</button>
