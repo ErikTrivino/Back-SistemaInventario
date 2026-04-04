@@ -10,6 +10,7 @@ import {
   TransferenciaConfirmarEnvioConCambiosDTO,
   TransferenciaRecepcionDTO
 } from '../modelo/crearObjetos';
+import { TransferenciaCancelarDTO } from '../modelo/editarObjeto';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +34,10 @@ export class TransferenciaService {
 
   enviarConCambios(dto: TransferenciaConfirmarEnvioConCambiosDTO): Observable<MensajeDTO> {
     return this.http.put<MensajeDTO>(`${this.apiUrl}/enviarConCambios`, dto);
+  }
+
+  cancelar(dto: TransferenciaCancelarDTO): Observable<MensajeDTO> {
+    return this.http.put<MensajeDTO>(`${this.apiUrl}/cancelar`, dto);
   }
 
   recibir(dto: TransferenciaRecepcionDTO): Observable<MensajeDTO> {

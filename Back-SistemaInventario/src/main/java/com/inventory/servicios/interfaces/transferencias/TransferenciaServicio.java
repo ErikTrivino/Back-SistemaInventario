@@ -7,6 +7,7 @@
         TransferenciaInformacionDTO requestTransfer(TransferenciaCrearDTO dto, Long userId);
         TransferenciaInformacionDTO prepareTransfer(TransferenciaPrepararDTO dto);
         TransferenciaInformacionDTO shipTransfer(TransferenciaConfirmarEnvioDTO dto);
+        TransferenciaInformacionDTO cancelarTranferencia(TrasnferenciaCancelarDTO dto);
         TransferenciaInformacionDTO shipTransferConCambios(TransferenciaConfirmarEnvioConCambiosDTO dto);
         TransferenciaInformacionDTO receiveTransfer(TransferenciaRecepcionDTO dto);
         Page<TransferenciaInformacionDTO> getTransfers(Long branchId, String status, LocalDateTime startDate, LocalDateTime endDate, Integer pagina, Integer porPagina);

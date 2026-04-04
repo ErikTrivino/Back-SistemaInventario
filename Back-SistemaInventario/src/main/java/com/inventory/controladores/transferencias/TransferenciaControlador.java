@@ -35,6 +35,10 @@ public class TransferenciaControlador {
     public ResponseEntity<MensajeDTO<Object>> enviar(@Valid @RequestBody TransferenciaConfirmarEnvioDTO dto) {
         return ResponseEntity.ok(new MensajeDTO<>(false, transferService.shipTransfer(dto)));
     }
+    @PutMapping("/cancelar")
+    public ResponseEntity<MensajeDTO<Object>> cancelar(@Valid @RequestBody TrasnferenciaCancelarDTO dto) {
+        return ResponseEntity.ok(new MensajeDTO<>(false, transferService.cancelarTranferencia(dto)));
+    }
 
     @PutMapping("/enviarConCambios")
     public ResponseEntity<MensajeDTO<Object>> enviarConCambios(@Valid @RequestBody TransferenciaConfirmarEnvioConCambiosDTO dto) {

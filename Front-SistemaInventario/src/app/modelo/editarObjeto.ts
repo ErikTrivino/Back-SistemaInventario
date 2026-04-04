@@ -37,6 +37,10 @@ export interface EditarProveedor {
   correo: string;
 }
 
+export interface TransferenciaCancelarDTO {
+  idTransferencia: number;
+}
+
 
 
 

@@ -122,6 +122,23 @@ public class TransferenciaServicioImpl implements TransferenciaServicio {
 
     @Override
     @Transactional
+    public TransferenciaInformacionDTO cancelarTranferencia(TrasnferenciaCancelarDTO dto) {
+        Transferencia transfer = transferRepository.findById(dto.idTransferencia()).orElseThrow();
+        transfer.setEstado(EstadoTransferencia.CANCELADO.name());
+        Transferencia saved = transferRepository.save(transfer);
+
+        auditService.registrarAccion("1", "CANCEL_TRANSFER", "Transferencia", saved.getId(), "Transferencia cancelada");
+        
+        eventPublisher.publicarTransferenciaCreada(saved, 
+                transfer.getUsuarioSolicitaId() != null 
+                    ? transfer.getUsuarioSolicitaId().toString() 
+                    : "sistema");
+
+        return toInfo(saved);
+    }
+
+    @Override
+    @Transactional
     public TransferenciaInformacionDTO shipTransferConCambios(TransferenciaConfirmarEnvioConCambiosDTO dto) {
         Transferencia transfer = transferRepository.findById(dto.idTransferencia()).orElseThrow();
 
