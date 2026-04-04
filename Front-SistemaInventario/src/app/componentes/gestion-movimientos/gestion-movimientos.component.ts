@@ -6,10 +6,12 @@ import { InventarioService } from '../../servicios/inventario.service';
 import { SucursalService } from '../../servicios/sucursal.service';
 import { InformacionMovimientoDTO, TipoMovimiento, InformacionProducto } from '../../modelo/informacionObjeto';
 
+import { PaginadorComponent } from '../comun/paginador/paginador.component';
+
 @Component({
   selector: 'app-gestion-movimientos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginadorComponent],
   templateUrl: './gestion-movimientos.component.html',
   styleUrl: './gestion-movimientos.component.css'
 })
@@ -104,6 +106,17 @@ export class GestionMovimientosComponent implements OnInit {
     if (nuevaPagina >= 0 && nuevaPagina < this.totalPaginas) {
       this.buscar(nuevaPagina);
     }
+  }
+
+  onCambioPagina(p: number) {
+    this.paginaActual = p;
+    this.buscar(p);
+  }
+
+  onCambioTamano(t: number) {
+    this.tamanoPagina = t;
+    this.paginaActual = 0;
+    this.buscar(0);
   }
 
   getTipoBadgeClass(tipo: TipoMovimiento): string {
