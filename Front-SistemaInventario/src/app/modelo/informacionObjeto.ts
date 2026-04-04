@@ -222,3 +222,23 @@ export interface AlertaStockDTO {
   stockMinimo: number | null;
   diferencia: number | null;
 }
+
+export interface InformacionMovimientoDTO {
+  id: number;
+  tipo: TipoMovimiento;
+  cantidad: number;
+  fechaMovimiento: string; // ISO date (ej: "2026-04-04T17:30:00")
+  usuarioId?: number;
+  sucursalId: number;
+  productoId: number;
+  referenciaId?: number;
+  motivo?: string;
+}
+export enum TipoMovimiento {
+  ENTRADA_COMPRA = 'ENTRADA_COMPRA',
+  SALIDA_VENTA = 'SALIDA_VENTA',
+  TRANSFERENCIA_ENVIO = 'TRANSFERENCIA_ENVIO',
+  TRANSFERENCIA_RECIBO = 'TRANSFERENCIA_RECIBO',
+  AJUSTE = 'AJUSTE',
+  MERMA = 'MERMA'
+}

@@ -24,6 +24,7 @@ import { SeguimientoEnviosComponent } from './componentes/seguimiento-envios/seg
 import { GestionSucursalesComponent } from './componentes/gestion-sucursales/gestion-sucursales.component';
 import { GestionVentasComponent } from './componentes/gestion-ventas/gestion-ventas.component';
 import { GestionReportesComponent } from './componentes/gestion-reportes/gestion-reportes.component';
+import { GestionAuditoriasComponent } from './componentes/gestion-auditorias/gestion-auditorias.component';
 
 export const routes: Routes = [
   {
@@ -59,6 +60,7 @@ export const routes: Routes = [
       { path: 'crear-usuario', component: CrearUsuarioComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
       { path: 'gestion-sucursales', component: GestionSucursalesComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
       { path: 'gestion-reportes', component: GestionReportesComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN", "MANAGER"] } },
+      { path: 'gestion-auditorias', component: GestionAuditoriasComponent, canActivate: [RolesGuard], data: { expectedRole: ["ADMIN"] } },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
