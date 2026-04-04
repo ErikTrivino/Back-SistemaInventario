@@ -99,7 +99,6 @@
               <th class="py-4 px-6 font-semibold text-sm text-black">Sucursal Destino</th>
               <th class="py-4 px-6 font-semibold text-sm text-black">Fecha Solicitud</th>
               <th class="py-4 px-6 font-semibold text-sm text-black">Estado</th>
-              <th class="py-4 px-6 font-semibold text-sm text-black text-center">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -143,45 +142,9 @@
                   {{t.estado}}
                 </span>
               </td>
-              <td class="py-4 px-6">
-                <div class="flex justify-center items-center gap-2">
-                  <!-- SOLICITADO → Preparar -->
-                  <button *ngIf="t.estado === 'SOLICITADO'" (click)="prepararTransferencia(t)" title="Preparar envío"
-                    class="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg dark:text-indigo-400 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                    </svg>
-                  </button>
-                  <!-- APROBADO → Enviar -->
-                  <button *ngIf="t.estado === 'APROBADO'" (click)="enviarTransferencia(t)" title="Marcar en tránsito"
-                    class="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg dark:text-blue-400 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                    </svg>
-                  </button>
-                  <!-- EN_TRANSITO → Recibir -->
-                  <button *ngIf="t.estado === 'EN_TRANSITO'" (click)="recibirTransferencia(t)"
-                    title="Confirmar recepción"
-                    class="p-2 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg dark:text-emerald-400 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                  </button>
-                  <!-- Estados finales -->
-                  <span *ngIf="t.estado === 'RECIBIDO'" class="text-xs text-green-600 dark:text-green-400 font-medium">✓
-                    Recibido</span>
-                  <span *ngIf="t.estado === 'FALTANTES'" class="text-xs text-red-600 dark:text-red-400 font-medium">⚠
-                    Faltantes</span>
-                  <span *ngIf="t.estado === 'CANCELADO'" class="text-xs text-gray-500 dark:text-gray-400 italic">✕
-                    Cancelado</span>
-                </div>
-              </td>
             </tr>
             <tr *ngIf="transferencias.length === 0">
-              <td colspan="6">
+              <td colspan="5">
                 <div class="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
                   <svg class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">

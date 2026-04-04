@@ -10,6 +10,7 @@ import { UsuarioService } from '../../servicios/usuario.service';
 import { TokenService } from '../../servicios/token.service';
 import { InformacionTransferencia, InformacionProducto } from '../../modelo/informacionObjeto';
 import { TransferenciaCrearDTO, TransferenciaPrepararDTO, TransferenciaConfirmarEnvioDTO, TransferenciaRecepcionDTO, TransferenciaConfirmarEnvioConCambiosDTO } from '../../modelo/crearObjetos';
+import { TransferenciaCancelarDTO } from '../../modelo/editarObjeto';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
 
 @Component({
@@ -530,6 +531,35 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
         error: (err) => {
           console.error(err);
           Swal.fire('Error', 'Hubo un error al recibir', 'error');
+        }
+      });
+    }
+  }
+
+  async cancelarTransferencia(t: InformacionTransferencia) {
+    const { isConfirmed } = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Deseas cancelar la transferencia #${t.idTransferencia}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cancelar',
+      cancelButtonText: 'No, mantener',
+      confirmButtonColor: '#d33'
+    });
+
+    if (isConfirmed) {
+      const dto: TransferenciaCancelarDTO = {
+        idTransferencia: t.idTransferencia
+      };
+
+      this.svc.cancelar(dto).subscribe({
+        next: () => {
+          Swal.fire('Cancelada', 'La transferencia ha sido cancelada correctamente', 'success');
+          this.cargar();
+        },
+        error: (err) => {
+          console.error(err);
+          Swal.fire('Error', err.error?.mensaje || 'No se pudo cancelar la transferencia', 'error');
         }
       });
     }

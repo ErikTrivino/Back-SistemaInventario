@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { TokenService } from '../../servicios/token.service';
 import { UsuarioService } from '../../servicios/usuario.service';
 import { TransferenciaService } from '../../servicios/transferencia.service';
@@ -12,7 +13,7 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
@@ -134,6 +135,14 @@ export class HeaderComponent implements OnInit {
         showConfirmButton: false
       });
     }
+  }
+
+  public logout(): void {
+    this.tokenSvc.logout();
+  }
+
+  public isLogged(): boolean {
+    return this.tokenSvc.isLogged();
   }
 
 }
