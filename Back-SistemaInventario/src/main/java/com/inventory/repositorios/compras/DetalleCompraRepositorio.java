@@ -10,7 +10,7 @@
         List<DetalleCompra> findByOrdenCompraId(Long ordenCompraId);
         
         @org.springframework.data.jpa.repository.Query("SELECT new com.inventory.modelo.dto.compras.CompraHistoricoRespuestaDTO(" +
-               "o.id, d.id, p.id, p.nombre, prov.id, prov.razonSocial, d.cantidadSolicitada, d.cantidadRecibida, d.precioUnitario, o.fechaCompra, o.estado" +
+               "o.id, d.id, p.id, p.nombre, prov.id, prov.razonSocial, d.cantidadSolicitada, d.cantidadRecibida, d.precioUnitario, o.fechaCompra, o.estado, o.sucursalDestinoId" +
                ") FROM DetalleCompra d " +
                "JOIN OrdenCompra o ON d.ordenCompraId = o.id " +
                "JOIN Producto p ON d.productoId = p.id " +

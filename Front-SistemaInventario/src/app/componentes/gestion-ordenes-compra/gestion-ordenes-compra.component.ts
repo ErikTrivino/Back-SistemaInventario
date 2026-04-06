@@ -5,6 +5,8 @@ import { CompraService } from '../../servicios/compra.service';
 import { ProveedorService } from '../../servicios/proveedor.service';
 import { InventarioService } from '../../servicios/inventario.service';
 import { SucursalService } from '../../servicios/sucursal.service';
+import { TokenService } from '../../servicios/token.service';
+import { UsuarioConsultaService } from '../../servicios/usuario-consulta.service';
 import { CompraHistoricoRespuestaDTO, InformacionProveedor, InformacionProducto } from '../../modelo/informacionObjeto';
 import { OrdenCompraCrearDTO, DetalleCompraCrearDTO, OrdenCompraRecepcionDTO } from '../../modelo/crearObjetos';
 import { PaginadorComponent } from '../comun/paginador/paginador.component';
@@ -22,6 +24,7 @@ export interface OrdenAgrupada {
   estado: string;
   detalles: CompraDetalleLocal[];
   total: number;
+  sucursalDestinoId: number;
   expandida?: boolean;
 }
 
@@ -58,6 +61,10 @@ export class GestionOrdenesCompraComponent implements OnInit {
   productos: InformacionProducto[] = [];
   sucursales: any[] = [];
 
+  // Datos Usuario Logueado
+  sucursalUsuarioLogueado: number = 0;
+  rolUsuarioLogueado: string = '';
+
   // Estado Nueva Orden
   nuevaOrden: OrdenCompraCrearDTO = {
     idSucursalDestino: 1, // Por defecto o seleccionable
@@ -73,12 +80,32 @@ export class GestionOrdenesCompraComponent implements OnInit {
     private compraService: CompraService,
     private proveedorService: ProveedorService,
     private inventarioService: InventarioService,
-    private sucursalService: SucursalService
+    private sucursalService: SucursalService,
+    private tokenSvc: TokenService,
+    private usuarioConsultaSvc: UsuarioConsultaService
   ) { }
 
   ngOnInit(): void {
+    this.cargarDatosUsuario();
     this.cargarCatalogos();
     this.cargarHistorial();
+  }
+
+  cargarDatosUsuario(): void {
+    if (this.tokenSvc.isLogged()) {
+      this.rolUsuarioLogueado = this.tokenSvc.getRol();
+      const userId = Number(this.tokenSvc.getIDCuenta());
+      if (userId) {
+        this.usuarioConsultaSvc.consultarPorId(userId).subscribe({
+          next: (res) => {
+            if (!res.error && res.respuesta) {
+              this.sucursalUsuarioLogueado = res.respuesta.sucursalAsignadaId || 0;
+
+            }
+          }
+        });
+      }
+    }
   }
 
   cargarCatalogos(): void {
@@ -142,9 +169,10 @@ export class GestionOrdenesCompraComponent implements OnInit {
                 fechaCompra: item.fechaCompra,
                 nombreProveedor: item.nombreProveedor,
                 idProveedor: item.idProveedor,
-                estado: item.estado, // Mantenemos el estado de la primera fila como general
+                estado: item.estado,
                 detalles: [],
                 total: 0,
+                sucursalDestinoId: item.sucursalDestinoId,
                 expandida: false
               });
             }
@@ -318,6 +346,13 @@ export class GestionOrdenesCompraComponent implements OnInit {
         Swal.fire('Atención', `La cantidad a recibir de ${det.nombreProducto} supera lo pendiente (${pendiente}).`, 'warning');
         return;
       }
+    }
+
+    // Validar Sucursal y Rol
+
+    if (orden.sucursalDestinoId !== this.sucursalUsuarioLogueado) {
+      Swal.fire('Acceso Denegado', 'Solo los usuarios de la sucursal de destino pueden confirmar esta recepción.', 'error');
+      return;
     }
 
     const { value: sucursalId } = await Swal.fire({

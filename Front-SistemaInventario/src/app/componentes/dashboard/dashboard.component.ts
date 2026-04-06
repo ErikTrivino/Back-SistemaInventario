@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { TableroService } from '../../servicios/tablero.service';
 import { AuditoriaService } from '../../servicios/auditoria.service';
 import { ReporteService } from '../../servicios/reporte.service';
+import { TokenService } from '../../servicios/token.service';
+
 import { MensajeDTO } from '../../modelo/mensaje-dto';
 import { AlertaStockDTO } from '../../modelo/informacionObjeto';
 import {
@@ -71,8 +73,10 @@ export class DashboardComponent implements OnInit {
   constructor(
     private tableroService: TableroService,
     private auditoriaService: AuditoriaService,
-    private reporteService: ReporteService
+    private reporteService: ReporteService,
+    private tokenService: TokenService
   ) { }
+
 
   ngOnInit(): void {
     this.initCharts();
@@ -248,5 +252,9 @@ export class DashboardComponent implements OnInit {
       case 'LOGOUT': return 'fa-sign-out-alt text-gray-500';
       default: return 'fa-history text-indigo-500';
     }
+  }
+
+  public isOperador(): boolean {
+    return this.tokenService.getRol() === 'OPERADOR';
   }
 }

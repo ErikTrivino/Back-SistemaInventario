@@ -44,6 +44,10 @@ public class Inventario {
     @Column(name = "precio_costo_promedio", nullable = false, precision = 14, scale = 4)
     private java.math.BigDecimal precioCostoPromedio = java.math.BigDecimal.ZERO;
 
+    @Builder.Default
+    @Column(name = "stock_maximo", nullable = false, precision = 12, scale = 2)
+    private java.math.BigDecimal stockMaximo = java.math.BigDecimal.ZERO;
+
     // Helper methods for migration/compatibility
     public Long getSucursalId() {
         return sucursal != null ? sucursal.getId() : null;

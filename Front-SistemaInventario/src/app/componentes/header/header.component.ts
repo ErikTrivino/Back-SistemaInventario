@@ -24,7 +24,9 @@ export class HeaderComponent implements OnInit {
   transferenciasCount = 0;
   comprasCount = 0;
   stockAlertasCount = 0;
+  excesoStockCount = 0;
   productosBajoStock: AlertaStockDTO[] = [];
+  productosExcesoStock: AlertaStockDTO[] = [];
   sucursalId = 0;
 
   constructor(
@@ -93,10 +95,20 @@ export class HeaderComponent implements OnInit {
         this.actualizarTotal();
       }
     });
+
+    // 5. Exceso Stock Alerts
+    this.tableroSvc.getAlertasExcesoStock(0, 5).subscribe({
+      next: (res: MensajeDTO) => {
+        const data = res.respuesta;
+        this.excesoStockCount = (data?.totalElements || data?.length || 0);
+        this.productosExcesoStock = data?.content || data || [];
+        this.actualizarTotal();
+      }
+    });
   }
 
   actualizarTotal(): void {
-    this.notificacionesCount = this.transferenciasCount + this.comprasCount + this.stockAlertasCount;
+    this.notificacionesCount = this.transferenciasCount + this.comprasCount + this.stockAlertasCount + this.excesoStockCount;
   }
 
   revisar(): void {
@@ -115,6 +127,13 @@ export class HeaderComponent implements OnInit {
         ).join('<br>');
         mensaje += `<small class="text-gray-500">${lista}${this.stockAlertasCount > 5 ? '<br>...y otros' : ''}</small><br>`;
       }
+      if (this.excesoStockCount > 0) {
+        mensaje += `<b>Exceso Stock:</b> ${this.excesoStockCount}<br>`;
+        const listaExceso = this.productosExcesoStock.slice(0, 5).map(p => 
+          `- <b>${p.nombreProducto}</b> (Stock: ${p.stockActual} / Max: ${p.stockMaximo}) - Sobran: ${p.diferencia}`
+        ).join('<br>');
+        mensaje += `<small class="text-gray-500">${listaExceso}${this.excesoStockCount > 5 ? '<br>...y otros' : ''}</small><br>`;
+      }
 
       Swal.fire({
         title: 'Tareas Pendientes',
@@ -126,7 +145,9 @@ export class HeaderComponent implements OnInit {
         this.transferenciasCount = 0;
         this.comprasCount = 0;
         this.stockAlertasCount = 0;
+        this.excesoStockCount = 0;
         this.productosBajoStock = [];
+        this.productosExcesoStock = [];
       });
     } else {
       Swal.fire({

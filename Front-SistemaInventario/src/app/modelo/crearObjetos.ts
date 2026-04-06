@@ -3,6 +3,7 @@ export interface DetalleProductoCrearDTO {
   precioCostoPromedio: number;
   cantidadInicial: number;
   cantidadMinima: number;
+  cantidadMaxima: number;
   idSucursal: number;
 }
 

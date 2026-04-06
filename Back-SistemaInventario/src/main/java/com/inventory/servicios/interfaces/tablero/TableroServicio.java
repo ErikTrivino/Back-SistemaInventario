@@ -9,6 +9,9 @@ public interface TableroServicio {
     /** RF-33: Lista de productos en alerta de stock mínimo. */
     Object getAlertasStock(Integer pagina, Integer porPagina);
 
+    /** RF-33 (Ext): Lista de productos con stock superior al máximo. */
+    Object getAlertasExcesoStock(Integer pagina, Integer porPagina);
+
     /** RF-24: Métricas de transferencias activas. */
     Object getMetricasTransferencias();
 }

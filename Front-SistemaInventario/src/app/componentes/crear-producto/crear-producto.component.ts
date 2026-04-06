@@ -45,6 +45,7 @@ export class CrearProductoComponent implements OnInit {
       precioCostoPromedio: [0, [Validators.required, Validators.min(0)]],
       cantidadInicial: [0, [Validators.required, Validators.min(0)]],
       cantidadMinima: [0, [Validators.required, Validators.min(0)]],
+      cantidadMaxima: [0, [Validators.required, Validators.min(0)]],
       idSucursal: [1, Validators.required]
     });
   }
@@ -108,6 +109,7 @@ export class CrearProductoComponent implements OnInit {
           precioCostoPromedio: Number(det.precioCostoPromedio),
           cantidadInicial: Number(det.cantidadInicial),
           cantidadMinima: Number(det.cantidadMinima),
+          cantidadMaxima: Number(det.cantidadMaxima),
           idSucursal: Number(det.idSucursal)
         }))
       };

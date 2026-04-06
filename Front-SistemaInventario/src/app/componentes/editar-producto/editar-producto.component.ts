@@ -37,6 +37,8 @@ export class EditarProductoComponent implements OnInit {
       unidadMedidaBase: ['', Validators.required],
       precioCostoPromedio: [0, [Validators.required, Validators.min(0)]],
       stock: [{ value: 0, disabled: false }, [Validators.required, Validators.min(0)]],
+      stockMinimo: [0, [Validators.required, Validators.min(0)]],
+      stockMaximo: [0, [Validators.required, Validators.min(0)]],
       activo: [true],
       idSucursal: ['', Validators.required],
       idProveedor: [null, Validators.required],
@@ -97,6 +99,8 @@ export class EditarProductoComponent implements OnInit {
           unidadMedidaBase: prod.unidadMedidaBase,
           precioCostoPromedio: prod.precioCostoPromedio,
           stock: prod.stock,
+          stockMinimo: prod.stockMinimo,
+          stockMaximo: prod.stockMaximo,
           activo: prod.activo,
           idSucursal: this.idSucursal,
           idProveedor: prod.idProveedor || prod.proveedor

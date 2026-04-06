@@ -1,298 +1,252 @@
 <div class="p-6 bg-gray-50 min-h-screen">
-  <!-- Header del Dashboard -->
-  <div class="mb-8 flex items-center justify-between">
-    <div>
-      <h2 class="text-3xl font-bold text-gray-800">Panel de Control</h2>
-      <p class="text-gray-500 mt-1">Estado general y métricas de rendimiento en tiempo real</p>
-    </div>
-    <div class="flex items-center gap-3">
-      <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-        Sincronizado: {{ resumen.ultimaSincronizacion | date:'shortTime' }}
-      </span>
-      <button (click)="cargarDatos()"
-        class="p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
-        <i class="fas fa-sync-alt text-gray-600"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- Fila 1: KPIs Principales (Ventas e Inventario) -->
-  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
-    <!-- Ingreso del Día -->
-    <div
-      class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
-      <div class="p-6 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ingresos Hoy</p>
-          <h4 class="text-2xl font-bold text-gray-800">${{ resumen.ingresoHoy | number:'1.2-2' }}</h4>
-        </div>
-        <div
-          class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-          <i class="fas fa-hand-holding-usd text-green-600 text-xl"></i>
-        </div>
+  <!-- Content for Admin/Gerente -->
+  <ng-container *ngIf="!isOperador()">
+    <!-- Header del Dashboard -->
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-800">Panel de Control</h2>
+        <p class="text-gray-500 mt-1">Estado general y métricas de rendimiento en tiempo real</p>
       </div>
+      <div class="flex items-center gap-3">
+        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+          Sincronizado: {{ resumen.ultimaSincronizacion | date:'shortTime' }}
+        </span>
+        <button (click)="cargarDatos()"
+          class="p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
+          <i class="fas fa-sync-alt text-gray-600"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Fila 1 -->
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
+      <!-- KPI cards ... (keep existing) -->
+      <!-- Ingreso del Día -->
       <div
-        class="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-0 group-hover:opacity-100 transition-opacity">
-      </div>
-    </div>
-
-    <!-- Ventas del Día -->
-    <div
-      class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
-      <div class="p-6 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ventas Hoy</p>
-          <h4 class="text-2xl font-bold text-gray-800">{{ resumen.ventasHoy }}</h4>
+        class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
+        <div class="p-6 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ingresos Hoy</p>
+            <h4 class="text-2xl font-bold text-gray-800">${{ resumen.ingresoHoy | number:'1.2-2' }}</h4>
+          </div>
+          <div
+            class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i class="fas fa-hand-holding-usd text-green-600 text-xl"></i>
+          </div>
         </div>
         <div
-          class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-          <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
+          class="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-0 group-hover:opacity-100 transition-opacity">
         </div>
       </div>
-      <div class="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-0 group-hover:opacity-100 transition-opacity">
-      </div>
-    </div>
 
-    <!-- Productos Agotados -->
-    <div
-      class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
-      <div class="p-6 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Prod. Agotados</p>
-          <h4 class="text-2xl font-bold text-gray-800">{{ resumen.productosAgotados }}</h4>
-        </div>
-        <div
-          class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-          <i class="fas fa-times-circle text-red-600 text-xl"></i>
-        </div>
-      </div>
-      <div class="absolute bottom-0 left-0 h-1 bg-red-600 w-full opacity-0 group-hover:opacity-100 transition-opacity">
-      </div>
-    </div>
-
-    <!-- Stock Mínimo -->
-    <div
-      class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
-      <div class="p-6 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Stock Mínimo</p>
-          <h4 class="text-2xl font-bold text-gray-800">{{ resumen.productosEnStockMinimo }}</h4>
-        </div>
-        <div
-          class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-          <i class="fas fa-exclamation-triangle text-orange-600 text-xl"></i>
-        </div>
-      </div>
+      <!-- Ventas del Día -->
       <div
-        class="absolute bottom-0 left-0 h-1 bg-orange-600 w-full opacity-0 group-hover:opacity-100 transition-opacity">
-      </div>
-    </div>
-  </div>
-
-  <!-- Fila 2: Logística y Órdenes -->
-  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 mb-8">
-    <!-- Órdenes Pendientes -->
-    <div
-      class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
-      <div class="p-6 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Órdenes por Recibir</p>
-          <h4 class="text-2xl font-bold text-gray-800">{{ resumen.ordenesPendientesRecepcion }}</h4>
+        class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
+        <div class="p-6 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ventas Hoy</p>
+            <h4 class="text-2xl font-bold text-gray-800">{{ resumen.ventasHoy }}</h4>
+          </div>
+          <div
+            class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
+          </div>
         </div>
         <div
-          class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-          <i class="fas fa-truck-loading text-indigo-600 text-xl"></i>
+          class="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-0 group-hover:opacity-100 transition-opacity">
         </div>
       </div>
+
+      <!-- Productos Agotados -->
       <div
-        class="absolute bottom-0 left-0 h-1 bg-indigo-500 w-full opacity-0 group-hover:opacity-100 transition-opacity">
-      </div>
-    </div>
-
-    <!-- Transferencias Pendientes -->
-    <div
-      class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
-      <div class="p-6 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Transf. Pendientes</p>
-          <h4 class="text-2xl font-bold text-gray-800">{{ resumen.transferenciasPendientes }}</h4>
+        class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
+        <div class="p-6 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Prod. Agotados</p>
+            <h4 class="text-2xl font-bold text-gray-800">{{ resumen.productosAgotados }}</h4>
+          </div>
+          <div
+            class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i class="fas fa-times-circle text-red-600 text-xl"></i>
+          </div>
         </div>
         <div
-          class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-          <i class="fas fa-clock text-yellow-600 text-xl"></i>
+          class="absolute bottom-0 left-0 h-1 bg-red-600 w-full opacity-0 group-hover:opacity-100 transition-opacity">
         </div>
       </div>
+
+      <!-- Stock Mínimo -->
       <div
-        class="absolute bottom-0 left-0 h-1 bg-yellow-500 w-full opacity-0 group-hover:opacity-100 transition-opacity">
-      </div>
-    </div>
-
-    <!-- Transferencias en Tránsito -->
-    <div
-      class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
-      <div class="p-6 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Transf. en Tránsito</p>
-          <h4 class="text-2xl font-bold text-gray-800">{{ resumen.transferenciasEnTransito }}</h4>
+        class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
+        <div class="p-6 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Stock Mínimo</p>
+            <h4 class="text-2xl font-bold text-gray-800">{{ resumen.productosEnStockMinimo }}</h4>
+          </div>
+          <div
+            class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i class="fas fa-exclamation-triangle text-orange-600 text-xl"></i>
+          </div>
         </div>
         <div
-          class="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-          <i class="fas fa-shuttle-van text-cyan-600 text-xl"></i>
+          class="absolute bottom-0 left-0 h-1 bg-orange-600 w-full opacity-0 group-hover:opacity-100 transition-opacity">
         </div>
       </div>
-      <div class="absolute bottom-0 left-0 h-1 bg-cyan-500 w-full opacity-0 group-hover:opacity-100 transition-opacity">
+    </div>
+
+    <!-- Fila 2: Logística -->
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 mb-8">
+      <div
+        class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
+        <div class="p-6 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Órdenes por Recibir</p>
+            <h4 class="text-2xl font-bold text-gray-800">{{ resumen.ordenesPendientesRecepcion }}</h4>
+          </div>
+          <div
+            class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i class="fas fa-truck-loading text-indigo-600 text-xl"></i>
+          </div>
+        </div>
+        <div
+          class="absolute bottom-0 left-0 h-1 bg-indigo-500 w-full opacity-0 group-hover:opacity-100 transition-opacity">
+        </div>
+      </div>
+
+      <div
+        class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
+        <div class="p-6 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Transf. Pendientes</p>
+            <h4 class="text-2xl font-bold text-gray-800">{{ resumen.transferenciasPendientes }}</h4>
+          </div>
+          <div
+            class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i class="fas fa-clock text-yellow-600 text-xl"></i>
+          </div>
+        </div>
+        <div
+          class="absolute bottom-0 left-0 h-1 bg-yellow-500 w-full opacity-0 group-hover:opacity-100 transition-opacity">
+        </div>
+      </div>
+
+      <div
+        class="relative flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow">
+        <div class="p-6 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Transf. en Tránsito</p>
+            <h4 class="text-2xl font-bold text-gray-800">{{ resumen.transferenciasEnTransito }}</h4>
+          </div>
+          <div
+            class="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i class="fas fa-shuttle-van text-cyan-600 text-xl"></i>
+          </div>
+        </div>
+        <div
+          class="absolute bottom-0 left-0 h-1 bg-cyan-500 w-full opacity-0 group-hover:opacity-100 transition-opacity">
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Fila 2: Gráficos de Tendencias -->
-  <div class="grid gap-6 grid-cols-1 xl:grid-cols-3 mb-8">
-    <!-- Tendencia de Ventas (Línea) -->
-    <div class="xl:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-bold text-gray-800">Ventas por Día (Última Semana)</h3>
-        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Actualizado</span>
-      </div>
-      <div class="w-full">
+    <!-- Fila 3: Gráficos -->
+    <div class="grid gap-6 grid-cols-1 xl:grid-cols-3 mb-8">
+      <div class="xl:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-bold text-gray-800">Ventas por Día (Última Semana)</h3>
+        </div>
         <apx-chart [series]="chartVentas.series!" [chart]="chartVentas.chart!" [xaxis]="chartVentas.xaxis!"
           [stroke]="chartVentas.stroke!" [dataLabels]="chartVentas.dataLabels!" [colors]="chartVentas.colors!"
           [fill]="chartVentas.fill!" [tooltip]="chartVentas.tooltip!" [yaxis]="chartVentas.yaxis!"></apx-chart>
       </div>
-    </div>
 
-    <!-- Productos Más Vendidos (Gráfico + Lista) -->
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h3 class="text-lg font-bold text-gray-800">Top Productos</h3>
-          <p class="text-[10px] text-gray-400 uppercase tracking-tighter">Rendimiento mensual</p>
-        </div>
-        <div class="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center">
-          <i class="fas fa-trophy text-yellow-500 text-sm"></i>
-        </div>
-      </div>
-
-      <!-- Gráfico Arriba -->
-      <div class="w-full mb-4">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
+        <h3 class="text-lg font-bold text-gray-800 mb-6">Top Productos</h3>
         <apx-chart [series]="chartProductos.series!" [chart]="chartProductos.chart!"
           [plotOptions]="chartProductos.plotOptions!" [xaxis]="chartProductos.xaxis!"
           [dataLabels]="chartProductos.dataLabels!" [colors]="chartProductos.colors!"></apx-chart>
-      </div>
-
-      <!-- Lista Detallada Abajo -->
-      <div class="mt-auto space-y-3">
-        <div *ngFor="let prod of topProductos"
-          class="flex flex-col gap-1.5 p-2.5 rounded-xl border border-gray-50 hover:border-blue-100 hover:bg-blue-50/30 transition-all group">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span [class]="'px-1.5 py-0.5 rounded text-[9px] font-black border ' + getBadgeClass(prod.clasificacion)">
-                {{ prod.clasificacion }}
-              </span>
-              <span class="text-xs font-bold text-gray-700 truncate max-w-[120px]">{{ prod.nombreProducto }}</span>
-            </div>
-            <span class="text-xs font-bold text-gray-900">{{ prod.valorTotalSalidas | currency:'USD':'symbol':'1.0-0'
-              }}</span>
-          </div>
-
-          <!-- Barra de participación -->
-          <div class="flex items-center gap-2">
-            <div class="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-blue-500 rounded-full transition-all duration-1000 group-hover:bg-blue-600"
-                [style.width.%]="prod.porcentajeParticipacion"></div>
-            </div>
-            <span class="text-[9px] font-bold text-gray-400 w-8 text-right">{{ prod.porcentajeParticipacion }}%</span>
-          </div>
-
-          <div class="flex justify-between items-center text-[9px]">
-            <span class="text-gray-400">Total: <b class="text-gray-600">{{ prod.totalSalidas }}</b> un.</span>
-            <span class="text-blue-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Ver detalle <i
-                class="fas fa-chevron-right ml-0.5"></i></span>
-          </div>
-        </div>
-
-        <!-- Empty State -->
-        <div *ngIf="topProductos.length === 0" class="flex flex-col items-center justify-center py-8 opacity-30">
-          <i class="fas fa-box-open text-2xl mb-2"></i>
-          <p class="text-[10px]">Sin datos este mes</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Fila 3: Movimientos y Actividad -->
-  <div class="grid gap-6 grid-cols-1 xl:grid-cols-3 mb-8">
-    <!-- Estado de Movimientos (Donut) -->
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <h3 class="text-lg font-bold text-gray-800 mb-6">Estado de Transferencias</h3>
-      <div class="flex justify-center">
-        <apx-chart [series]="chartMovimientos.series!" [chart]="chartMovimientos.chart!"
-          [labels]="chartMovimientos.labels!" [colors]="chartMovimientos.colors!"
-          [legend]="chartMovimientos.legend!"></apx-chart>
-      </div>
-    </div>
-
-    <!-- Alertas de Stock Crítico -->
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-bold text-gray-800">Alertas de Stock</h3>
-        <span *ngIf="alertasStock.length > 0"
-          class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold">
-          {{ alertasStock.length }} productos
-        </span>
-      </div>
-
-      <div class="space-y-4">
-        <div *ngFor="let alerta of alertasStock"
-          class="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
-          <div class="flex flex-col">
-            <span class="text-sm font-bold text-gray-800">{{ alerta.nombreProducto }}</span>
-            <span class="text-[10px] text-gray-500 uppercase tracking-wider">Sucursal #{{ alerta.idSucursal }}</span>
-          </div>
-          <div class="text-right">
-            <span class="block text-xs font-bold text-red-600">{{ alerta.stockActual }} / {{ alerta.stockMinimo
-              }}</span>
-            <span class="text-[10px] text-red-400">Stock Actual</span>
-          </div>
-        </div>
-
-        <div *ngIf="alertasStock.length === 0" class="flex flex-col items-center justify-center py-10 opacity-40">
-          <i class="fas fa-check-circle text-4xl mb-2 text-green-500"></i>
-          <p class="text-sm text-center">Todo el inventario está en niveles óptimos</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actividad Reciente (Feed) -->
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-bold text-gray-800">Actividad Reciente</h3>
-        <a href="/gestion-auditorias" class="text-xs font-semibold text-blue-600 hover:underline">Ver todo</a>
-      </div>
-
-      <div class="overflow-y-auto max-h-[350px] pr-2 custom-scrollbar">
-        <div *ngFor="let act of actividades"
-          class="flex items-start gap-4 mb-5 pb-5 border-b border-gray-50 last:border-0 last:mb-0 last:pb-0">
-          <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
-            <i class="fas" [ngClass]="getIconForActivity(act.accion)"></i>
-          </div>
-          <div class="flex-1">
+        <div class="mt-4 space-y-3 overflow-y-auto max-h-[300px]">
+          <div *ngFor="let prod of topProductos"
+            class="flex flex-col gap-1 p-2 rounded-lg bg-gray-50 border border-gray-100">
             <div class="flex items-center justify-between">
-              <p class="text-sm font-semibold text-gray-800">{{ act.detalles }}</p>
-              <span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{{ act.fechaHora |
-                date:'shortTime' }}</span>
+              <span class="text-xs font-bold text-gray-700 truncate max-w-[120px]">{{ prod.nombreProducto }}</span>
+              <span class="text-xs font-bold text-gray-900">{{ prod.valorTotalSalidas | currency:'USD':'symbol':'1.0-0'
+                }}</span>
             </div>
-            <p class="text-xs text-gray-500 mt-0.5">
-              <span class="font-medium text-blue-600 mr-1">[{{ act.entidad }}]</span>
-              Por: <span class="text-gray-700 italic text-[10px]">{{ act.usuario }}</span>
-            </p>
+            <div class="flex items-center gap-2">
+              <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500" [style.width.%]="prod.porcentajeParticipacion"></div>
+              </div>
+              <span class="text-[9px] font-bold text-gray-400 w-8 text-right">{{ prod.porcentajeParticipacion }}%</span>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div *ngIf="actividades.length === 0" class="flex flex-col items-center justify-center py-10 opacity-40">
-          <i class="fas fa-history text-4xl mb-2"></i>
-          <p class="text-sm">No hay actividad reciente registrada</p>
+    <!-- Fila 4: Movimientos, Alertas y Actividad -->
+    <div class="grid gap-6 grid-cols-1 xl:grid-cols-3 mb-8">
+      <!-- Movimientos -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h3 class="text-lg font-bold text-gray-800 mb-6">Estado de Transferencias</h3>
+        <div class="flex justify-center">
+          <apx-chart [series]="chartMovimientos.series!" [chart]="chartMovimientos.chart!"
+            [labels]="chartMovimientos.labels!" [colors]="chartMovimientos.colors!"
+            [legend]="chartMovimientos.legend!"></apx-chart>
         </div>
       </div>
+
+      <!-- Alertas Stock -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h3 class="text-lg font-bold text-gray-800 mb-6">Alertas de Stock</h3>
+        <div class="space-y-4 max-h-[350px] overflow-y-auto">
+          <div *ngFor="let alerta of alertasStock"
+            class="p-3 bg-red-50 rounded-xl border border-red-100 flex items-center justify-between">
+            <div>
+              <span class="block text-sm font-bold text-gray-800">{{ alerta.nombreProducto }}</span>
+              <span class="text-[10px] text-gray-500">Sucursal #{{ alerta.idSucursal }}</span>
+            </div>
+            <span class="text-xs font-bold text-red-600">{{ alerta.stockActual }} / {{ alerta.stockMinimo }}</span>
+          </div>
+          <div *ngIf="alertasStock.length === 0" class="flex flex-col items-center justify-center py-10 opacity-40">
+            <i class="fas fa-check-circle text-4xl mb-2 text-green-500"></i>
+            <p class="text-sm">Inventario óptimo</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actividad Reciente -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <h3 class="text-lg font-bold text-gray-800 mb-6">Actividad Reciente</h3>
+        <div class="overflow-y-auto max-h-[350px] pr-2 custom-scrollbar">
+          <div *ngFor="let act of actividades"
+            class="flex items-start gap-3 mb-4 pb-4 border-b border-gray-50 last:border-0">
+            <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
+              <i class="fas text-xs" [ngClass]="getIconForActivity(act.accion)"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-xs font-semibold text-gray-800 truncate">{{ act.detalles }}</p>
+              <p class="text-[10px] text-gray-500 mt-0.5">{{ act.fechaHora | date:'shortTime' }} - {{ act.usuario }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Content for Operador -->
+  <div *ngIf="isOperador()" class="flex flex-col items-center justify-center h-[70vh] text-center px-4 animate-fade-in">
+    <div
+      class="bg-white p-8 md:p-14 rounded-[2rem] shadow-2xl border border-blue-50 max-w-3xl transform hover:scale-[1.02] transition-transform duration-500">
+      <div
+        class="w-24 h-24 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-3xl flex items-center justify-center mx-auto mb-10 shadow-lg rotate-3">
+        <i class="fas fa-user-tie text-white text-4xl"></i>
+      </div>
+      <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6 tracking-tight">¡Bienvenido Operador!</h2>
+      <p class="text-xl md:text-2xl text-gray-600 font-medium leading-relaxed mb-10">
+        Ya puedes realizar tus funciones asignadas en el sistema. Utiliza el menú lateral para acceder a tus módulos de
+        trabajo.
+      </p>
+
     </div>
   </div>
 </div>

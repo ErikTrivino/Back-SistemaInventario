@@ -25,4 +25,10 @@ export class TableroService {
   getMetricasTransferencias(): Observable<MensajeDTO> {
     return this.http.get<MensajeDTO>(`${this.apiUrl}/transferencias`);
   }
+
+  getAlertasExcesoStock(pagina?: number, porPagina: number = 10): Observable<MensajeDTO> {
+    let params = new HttpParams().set('porPagina', porPagina.toString());
+    if (pagina !== undefined) params = params.set('pagina', pagina.toString());
+    return this.http.get<MensajeDTO>(`${this.apiUrl}/alertas-exceso-stock`, { params });
+  }
 }

@@ -105,10 +105,19 @@
           </div>
 
           <!-- Cantidad minima -->
-          <div class="col-md-6">
+          <div class="col-md-4">
             <label class="form-label fw-semibold">Cantidad Mínima <span class="text-danger">*</span></label>
             <input formControlName="cantidadMinima" type="number" min="0" class="form-control"
               [class.is-invalid]="$any(det).get('cantidadMinima')?.invalid && $any(det).get('cantidadMinima')?.touched"
+              placeholder="0" />
+            <div class="invalid-feedback">Mínimo 0.</div>
+          </div>
+
+          <!-- Cantidad maxima -->
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Cantidad Máxima <span class="text-danger">*</span></label>
+            <input formControlName="cantidadMaxima" type="number" min="0" class="form-control"
+              [class.is-invalid]="$any(det).get('cantidadMaxima')?.invalid && $any(det).get('cantidadMaxima')?.touched"
               placeholder="0" />
             <div class="invalid-feedback">Mínimo 0.</div>
           </div>

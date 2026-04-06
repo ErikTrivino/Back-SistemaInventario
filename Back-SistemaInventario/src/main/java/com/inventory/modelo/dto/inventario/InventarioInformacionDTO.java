@@ -9,7 +9,8 @@ public record InventarioInformacionDTO(
         String sku,
         String descripcion,
         BigDecimal stockActual,
-        BigDecimal stockMinimo
+        BigDecimal stockMinimo,
+        BigDecimal stockMaximo
 ) {
 }
 

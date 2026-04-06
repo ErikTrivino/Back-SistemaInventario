@@ -23,6 +23,8 @@ export interface EditarProducto {
   unidadMedidaBase: string;
   precioCostoPromedio: number;
   stock: number;
+  stockMinimo: number;
+  stockMaximo: number;
   idSucursal: number;
   idProveedor: number;
   idUsuarioResponsable: number;

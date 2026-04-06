@@ -99,7 +99,7 @@ public class DataInitializer implements CommandLineRunner {
         seedRolEntidades();
         List<Sucursal> sucursales = seedSucursales();
         seedUnidadesMedida();
-        
+
         Map<String, List<?>> data = new HashMap<>();
         data.put("sucursales", sucursales);
         return data;
@@ -122,10 +122,11 @@ public class DataInitializer implements CommandLineRunner {
         return seedUsuarios(sucursales);
     }
 
-    private void seedOperationData(List<Sucursal> sucs, List<Producto> prods, List<Proveedor> provs, List<Usuario> usus) {
+    private void seedOperationData(List<Sucursal> sucs, List<Producto> prods, List<Proveedor> provs,
+            List<Usuario> usus) {
         log.info("  - Sembrando datos de Operaciones...");
         seedInventario(sucs, prods);
-        
+
         List<OrdenCompra> compras = seedOrdenesCompra(sucs, provs, usus);
         seedDetalleCompras(compras, prods);
 
@@ -142,7 +143,7 @@ public class DataInitializer implements CommandLineRunner {
         log.info("  - Sembrando datos de Logística...");
         List<Transportista> transportistas = seedTransportistas();
         List<Ruta> rutas = seedRutas(sucs);
-        
+
         // Necesitamos las transferencias para los envíos, las recuperamos del repo
         List<Transferencia> transferencias = transferenciaRepository.findAll();
         seedEnvios(transferencias, transportistas, rutas);
@@ -235,7 +236,7 @@ public class DataInitializer implements CommandLineRunner {
                         .sucursalAsignadaId(sucursal.getId())
                         .activo(true)
                         .build());
-                
+
                 // Gerente de la sucursal
                 list.add(Usuario.builder()
                         .nombre("Gerente " + sId)
@@ -284,7 +285,8 @@ public class DataInitializer implements CommandLineRunner {
                             .precioCostoPromedio(new BigDecimal("550000")).activo(true).build(),
                     Producto.builder().nombre("Mouse Razer DeathAdder V2").sku("MOU-RAZ-DV2")
                             .descripcion("Ergonómico, 20K DPI Optical Sensor").unidadMedidaBase("UND")
-                            .precioCostoPromedio(new BigDecimal("280000")).activo(false).build()); // Inactivo globalmente
+                            .precioCostoPromedio(new BigDecimal("280000")).activo(false).build()); // Inactivo
+                                                                                                   // globalmente
             return productoRepository.saveAll(list);
         }
         return productoRepository.findAll();
@@ -293,15 +295,16 @@ public class DataInitializer implements CommandLineRunner {
     private void seedInventario(List<Sucursal> sucursales, List<Producto> productos) {
         if (inventarioRepository.count() == 0 && !sucursales.isEmpty() && !productos.isEmpty()) {
             Random rand = new Random();
-            
+
             // Definimos factores de variación de precio por sucursal para dar realismo
-            // Sede Principal (0): 1.0, Norte (1): 1.05, Medellín (2): 0.98, Cali (3): 1.02, Barranquilla (4): 1.10
+            // Sede Principal (0): 1.0, Norte (1): 1.05, Medellín (2): 0.98, Cali (3): 1.02,
+            // Barranquilla (4): 1.10
             BigDecimal[] factoresPrecio = {
-                new BigDecimal("1.00"), 
-                new BigDecimal("1.05"), 
-                new BigDecimal("0.98"), 
-                new BigDecimal("1.02"), 
-                new BigDecimal("1.10")
+                    new BigDecimal("1.00"),
+                    new BigDecimal("1.05"),
+                    new BigDecimal("0.98"),
+                    new BigDecimal("1.02"),
+                    new BigDecimal("1.10")
             };
 
             for (int i = 0; i < sucursales.size(); i++) {
@@ -310,9 +313,10 @@ public class DataInitializer implements CommandLineRunner {
 
                 for (Producto p : productos) {
                     // Lógica de coherencia:
-                    // 1. Si el producto ya está inactivo globalmente, queda inactivo en la sucursal.
-                    // 2. De lo contrario, activamos el producto en la sucursal, 
-                    //    EXCEPTO en un ~20% de casos aleatorios para pruebas de filtrado.
+                    // 1. Si el producto ya está inactivo globalmente, queda inactivo en la
+                    // sucursal.
+                    // 2. De lo contrario, activamos el producto en la sucursal,
+                    // EXCEPTO en un ~20% de casos aleatorios para pruebas de filtrado.
                     boolean estaActivoEnSucursal = p.getActivo() && (rand.nextInt(10) > 1);
 
                     // El precio de costo en la sucursal varía según el factor definido
@@ -323,6 +327,7 @@ public class DataInitializer implements CommandLineRunner {
                             .producto(p)
                             .stock(new BigDecimal(rand.nextInt(100) + 10))
                             .stockMinimo(new BigDecimal(5))
+                            .stockMaximo(new BigDecimal(100))
                             .activo(estaActivoEnSucursal)
                             .precioCostoPromedio(precioSucursal)
                             .build());
@@ -331,7 +336,6 @@ public class DataInitializer implements CommandLineRunner {
             log.info("  - Inventario por sucursal inicializado (con precios diferenciados y varianza de estado).");
         }
     }
-
 
     private void seedProductoProveedores(List<Producto> productos, List<Proveedor> proveedores) {
         if (productoProveedorRepository.count() == 0 && !productos.isEmpty() && !proveedores.isEmpty()) {
@@ -491,7 +495,7 @@ public class DataInitializer implements CommandLineRunner {
             for (int i = 0; i < transferencias.size(); i++) {
                 Transferencia t = transferencias.get(i);
                 EstadoLogistico estLog = null;
-                
+
                 if (EstadoTransferencia.APROBADO.name().equals(t.getEstado())) {
                     estLog = EstadoLogistico.PREPARACION;
                 } else if (EstadoTransferencia.EN_TRANSITO.name().equals(t.getEstado())) {
@@ -519,29 +523,31 @@ public class DataInitializer implements CommandLineRunner {
         if (transferenciaRepository.count() == 0 && sucs.size() >= 2) {
             List<Transferencia> list = new ArrayList<>();
             Random random = new Random();
-            
+
             for (EstadoTransferencia estado : EstadoTransferencia.values()) {
                 // Creamos 2 transferencias por cada estado para tener cobertura completa
                 for (int i = 0; i < 2; i++) {
                     int idxOrigen = random.nextInt(sucs.size());
                     int idxDestino = (idxOrigen + 1 + random.nextInt(sucs.size() - 1)) % sucs.size();
-                    
+
                     Sucursal sucursalOrigen = sucs.get(idxOrigen);
                     Sucursal sucursalDestino = sucs.get(idxDestino);
-                    
-                    // El solicitante debe pertenecer a la sucursal de destino (la que pide la mercancia)
+
+                    // El solicitante debe pertenecer a la sucursal de destino (la que pide la
+                    // mercancia)
                     final Long destId = sucursalDestino.getId();
                     Usuario solicitante = usus.stream()
                             .filter(u -> destId.equals(u.getSucursalAsignadaId()))
                             .findFirst()
                             .orElse(usus.get(0));
 
-                    // Coherencia de fechas: estados finales son más antiguos, los nuevos son "recientes"
+                    // Coherencia de fechas: estados finales son más antiguos, los nuevos son
+                    // "recientes"
                     int diasAtras;
                     switch (estado) {
                         case RECIBIDO, FALTANTES, CANCELADO -> diasAtras = 10 + random.nextInt(10); // 10-20 días
-                        case EN_TRANSITO, APROBADO -> diasAtras = 3 + random.nextInt(5);      // 3-8 días
-                        default -> diasAtras = random.nextInt(3);                           // 0-2 días (SOLICITADO)
+                        case EN_TRANSITO, APROBADO -> diasAtras = 3 + random.nextInt(5); // 3-8 días
+                        default -> diasAtras = random.nextInt(3); // 0-2 días (SOLICITADO)
                     }
 
                     list.add(Transferencia.builder()
@@ -558,7 +564,6 @@ public class DataInitializer implements CommandLineRunner {
         }
         return transferenciaRepository.findAll();
     }
-
 
     private void seedDetalleTransferencias(List<Transferencia> transfs, List<Producto> prods) {
         if (detalleTransferenciaRepository.count() == 0 && !transfs.isEmpty() && !prods.isEmpty()) {

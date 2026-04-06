@@ -29,6 +29,14 @@ public class TableroControlador {
         return ResponseEntity.ok(new MensajeDTO<>(false, tableroServicio.getAlertasStock(pagina, porPagina)));
     }
 
+    /** RF-33 (Ext): Lista de productos con stock superior al máximo (paginado). */
+    @GetMapping("/alertas-exceso-stock")
+    public ResponseEntity<MensajeDTO<Object>> alertasExcesoStock(
+            @RequestParam(required = false, defaultValue = "10") Integer porPagina,
+            @RequestParam(required = false) Integer pagina) {
+        return ResponseEntity.ok(new MensajeDTO<>(false, tableroServicio.getAlertasExcesoStock(pagina, porPagina)));
+    }
+
     /** RF-24: Métricas de transferencias activas. */
     @GetMapping("/transferencias")
 

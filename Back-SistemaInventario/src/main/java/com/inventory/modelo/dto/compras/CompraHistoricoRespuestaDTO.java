@@ -14,5 +14,6 @@ public record CompraHistoricoRespuestaDTO(
                 BigDecimal cantidadRecibida,
                 BigDecimal precioUnitario,
                 LocalDateTime fechaCompra,
-                String estado) {
+                String estado,
+                Long sucursalDestinoId) {
 }

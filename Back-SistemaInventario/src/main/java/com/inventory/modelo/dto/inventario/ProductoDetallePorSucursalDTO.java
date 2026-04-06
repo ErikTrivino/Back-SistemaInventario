@@ -10,6 +10,7 @@ public record ProductoDetallePorSucursalDTO(
         String unidadMedidaBase,
         BigDecimal precioCostoPromedio,
         BigDecimal stock,
+        BigDecimal stockMaximo,
         boolean activo,
         Long idSucursal,
         Long proveedor

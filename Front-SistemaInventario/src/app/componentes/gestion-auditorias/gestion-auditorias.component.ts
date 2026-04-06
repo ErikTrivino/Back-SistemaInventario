@@ -54,15 +54,23 @@ export class GestionAuditoriasComponent implements OnInit {
 
   cargarLogs(pagina: number = 0): void {
     this.paginaActual = pagina;
+
     if (this.filtroUsuarioId || this.filtroUsuarioSeleccionado) {
       const idABuscar = this.filtroUsuarioId || this.filtroUsuarioSeleccionado;
-      this.auditoriaSvc.getAuditLogsByUser(idABuscar, this.paginaActual + 1, this.porPagina).subscribe({
-        next: (data: MensajeDTO) => this.procesarRespuesta(data),
+      this.auditoriaSvc.getAuditLogsByUser(idABuscar, this.paginaActual, this.porPagina).subscribe({
+        next: (data: MensajeDTO) => {
+
+
+          this.procesarRespuesta(data);
+        },
         error: (e) => console.error(e)
       });
     } else {
-      this.auditoriaSvc.getAuditLogs(this.paginaActual + 1, this.porPagina).subscribe({
-        next: (data: MensajeDTO) => this.procesarRespuesta(data),
+      this.auditoriaSvc.getAuditLogs(this.paginaActual, this.porPagina).subscribe({
+        next: (data: MensajeDTO) => {
+
+          this.procesarRespuesta(data);
+        },
         error: (e) => console.error(e)
       });
     }

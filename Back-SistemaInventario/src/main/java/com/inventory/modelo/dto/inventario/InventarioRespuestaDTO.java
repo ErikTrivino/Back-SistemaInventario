@@ -12,6 +12,7 @@ public record InventarioRespuestaDTO(
         Long idSucursal,
         BigDecimal stock,
         BigDecimal stockMinimo,
+        BigDecimal stockMaximo,
         BigDecimal precioCostoPromedio,
         Long idProveedor
 ) {}

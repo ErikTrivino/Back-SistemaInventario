@@ -10,6 +10,7 @@ export interface CompraHistoricoRespuestaDTO {
   precioUnitario: number;
   fechaCompra: Date;
   estado: string;
+  sucursalDestinoId: number;
 }
 
 
@@ -39,6 +40,8 @@ export interface InformacionProducto {
   activo: boolean;
   stockTotal?: number;
   stockActual?: number;
+  stockMinimo?: number;
+  stockMaximo?: number;
   idProveedor?: number;
   nombreProveedor?: string;
 }
@@ -116,6 +119,7 @@ export interface ProductoDetallePorSucursalDTO {
   unidadMedidaBase: string;
   precioCostoPromedio: number;
   stock: number;
+  stockMaximo: number;
   idSucursal: number;
   proveedor: number;
 }
@@ -166,6 +170,7 @@ export interface ItemInventarioDTO {
   sku: string;
   stockActual: number;
   stockMinimo: number;
+  stockMaximo: number;
   estadoStock: 'NORMAL' | 'BAJO' | 'AGOTADO';
 }
 export interface ReporteTransferenciasDTO {
@@ -222,6 +227,7 @@ export interface AlertaStockDTO {
   idSucursal: number;
   stockActual: number | null;
   stockMinimo: number | null;
+  stockMaximo: number | null;
   diferencia: number | null;
 }
 

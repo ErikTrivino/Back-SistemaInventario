@@ -91,12 +91,14 @@ public class InventarioServicioImpl implements InventarioServicio {
 
             BigDecimal stock = BigDecimal.ZERO;
             BigDecimal stockMinimo = BigDecimal.ZERO;
+            BigDecimal stockMaximo = BigDecimal.ZERO;
             BigDecimal precioSucursal = costBase;
             boolean activo = false;
 
             if (detail != null) {
                 stock = detail.cantidadInicial() == null ? BigDecimal.ZERO : detail.cantidadInicial();
                 stockMinimo = detail.cantidadMinima() == null ? BigDecimal.ZERO : detail.cantidadMinima();
+                stockMaximo = detail.cantidadMaxima() == null ? BigDecimal.ZERO : detail.cantidadMaxima();
                 activo = dto.activo();
                 if (detail.precioCostoPromedio() != null) {
                     precioSucursal = detail.precioCostoPromedio();
@@ -108,6 +110,7 @@ public class InventarioServicioImpl implements InventarioServicio {
                     .sucursal(sucursal)
                     .stock(stock)
                     .stockMinimo(stockMinimo)
+                    .stockMaximo(stockMaximo)
                     .activo(activo)
                     .precioCostoPromedio(precioSucursal)
                     .build();
@@ -161,7 +164,8 @@ public class InventarioServicioImpl implements InventarioServicio {
                                 .producto(product)
                                 .sucursal(sucursal)
                                 .stock(java.math.BigDecimal.ZERO)
-                                .stockMinimo(java.math.BigDecimal.ZERO)
+                                .stockMinimo(dto.stockMinimo() == null ? java.math.BigDecimal.ZERO : dto.stockMinimo())
+                                .stockMaximo(dto.stockMaximo() == null ? java.math.BigDecimal.ZERO : dto.stockMaximo())
                                 .activo(dto.activo())
                                 .precioCostoPromedio(dto.precioCostoPromedio() == null ? java.math.BigDecimal.ZERO
                                         : dto.precioCostoPromedio())
@@ -169,6 +173,8 @@ public class InventarioServicioImpl implements InventarioServicio {
                     });
             inv.setActivo(dto.activo());
             inv.setStock(dto.stock());
+            inv.setStockMinimo(dto.stockMinimo() == null ? java.math.BigDecimal.ZERO : dto.stockMinimo());
+            inv.setStockMaximo(dto.stockMaximo() == null ? java.math.BigDecimal.ZERO : dto.stockMaximo());
             inventoryRepository.save(inv);
 
             MovimientoInventario movement = MovimientoInventario.builder()
@@ -259,7 +265,7 @@ public class InventarioServicioImpl implements InventarioServicio {
         return new InventarioRespuestaDTO(
                 dto.idProducto(), dto.nombreProducto(), dto.sku(), dto.unidadMedida(),
                 dto.descripcion(), dto.activo(), dto.idSucursal(), dto.stock(),
-                dto.stockMinimo(), dto.precioCostoPromedio(), providerId);
+                dto.stockMinimo(), dto.stockMaximo(), dto.precioCostoPromedio(), providerId);
     }
 
     @Override
@@ -415,6 +421,7 @@ public class InventarioServicioImpl implements InventarioServicio {
                 inventory.getProducto().getSku(),
                 inventory.getProducto().getDescripcion(),
                 inventory.getStock(),
-                inventory.getStockMinimo());
+                inventory.getStockMinimo(),
+                inventory.getStockMaximo());
     }
 }

@@ -3,6 +3,7 @@ package com.inventory.servicios.implementaciones.tablero;
 import com.inventory.servicios.interfaces.tablero.TableroServicio;
 import com.inventory.modelo.dto.tablero.TableroResumenDTO;
 import com.inventory.modelo.dto.tablero.AlertaStockDTO;
+import com.inventory.modelo.dto.tablero.AlertaExcesoStockDTO;
 import com.inventory.repositorios.ventas.VentaRepositorio;
 import com.inventory.repositorios.inventario.InventarioRepositorio;
 import com.inventory.repositorios.transferencias.TransferenciaRepositorio;
@@ -69,6 +70,26 @@ public class TableroServicioImpl implements TableroServicio {
                         inv.getStock(),
                         inv.getStockMinimo(),
                         inv.getStockMinimo().subtract(inv.getStock())
+                ));
+    }
+
+    /**
+     * RF-33 (Ext): Devuelve los productos con stock superior al máximo configurado (paginado).
+     */
+    @Override
+    public org.springframework.data.domain.Page<AlertaExcesoStockDTO> getAlertasExcesoStock(Integer pagina, Integer porPagina) {
+        int numPagina = (pagina != null && pagina > 0) ? pagina - 1 : 0;
+        int tamanoPagina = (porPagina != null && porPagina > 0) ? porPagina : 10;
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(numPagina, tamanoPagina);
+        
+        return inventarioRepositorio.findByQuantityGreaterThanMaxStock(pageable)
+                .map(inv -> new AlertaExcesoStockDTO(
+                        inv.getProductoId(),
+                        "Producto #" + inv.getProductoId(),
+                        inv.getSucursalId(),
+                        inv.getStock(),
+                        inv.getStockMaximo(),
+                        inv.getStock().subtract(inv.getStockMaximo())
                 ));
     }
 
