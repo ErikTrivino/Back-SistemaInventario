@@ -4,7 +4,6 @@ import com.inventory.eventos.PublicadorEventos;
 import com.inventory.servicios.interfaces.transferencias.TransferenciaServicio;
 import com.inventory.servicios.interfaces.inventario.InventarioServicio;
 import com.inventory.repositorios.transferencias.TransferenciaRepositorio;
-import com.inventory.servicios.interfaces.auditoria.AuditoriaServicio;
 import com.inventory.modelo.dto.transferencias.*;
 import com.inventory.modelo.entidades.transferencias.Transferencia;
 import com.inventory.modelo.entidades.transferencias.DetalleTransferencia;
@@ -12,6 +11,8 @@ import com.inventory.modelo.entidades.logistica.Envio;
 import com.inventory.modelo.entidades.logistica.Ruta;
 import com.inventory.modelo.enums.EstadoTransferencia;
 import com.inventory.repositorios.logistica.RutaRepositorio;
+import com.inventory.repositorios.inventario.ProductoRepositorio;
+import com.inventory.modelo.entidades.inventario.Producto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,9 @@ import org.springframework.data.domain.Pageable;
 public class TransferenciaServicioImpl implements TransferenciaServicio {
         private final TransferenciaRepositorio transferRepository;
         private final InventarioServicio inventoryService;
-        private final AuditoriaServicio auditService;
         private final PublicadorEventos eventPublisher;
         private final RutaRepositorio rutaRepositorio;
+        private final ProductoRepositorio productRepository;
 
         @Override
         @Transactional
@@ -59,7 +60,7 @@ public class TransferenciaServicioImpl implements TransferenciaServicio {
                 transfer.setDetalles(detalles);
                 Transferencia saved = transferRepository.save(transfer);
 
-                auditService.registrarAccion(userId.toString(), "REQUEST_TRANSFER", "Transferencia", saved.getId(),
+                eventPublisher.publicarAuditoria(userId.toString(), "REQUEST_TRANSFER", "Transferencia", saved.getId(),
                                 "Solicitud de transferencia con los productos: " + dto.items().size());
 
                 eventPublisher.publicarTransferenciaCreada(saved, userId.toString());
@@ -89,7 +90,7 @@ public class TransferenciaServicioImpl implements TransferenciaServicio {
                 transfer.setRuta(savedRuta);
 
                 transfer.setEstado(EstadoTransferencia.APROBADO.name());
-                auditService.registrarAccion("1", "PREPARE_TRANSFER", "Transferencia", transfer.getId(),
+                eventPublisher.publicarAuditoria("1", "PREPARE_TRANSFER", "Transferencia", transfer.getId(),
                                 "Productos preparados para despacho y ruta establecida");
 
                 return toInfo(transferRepository.save(transfer));
@@ -127,7 +128,7 @@ public class TransferenciaServicioImpl implements TransferenciaServicio {
                 transfer.setEstado(EstadoTransferencia.EN_TRANSITO.name());
                 Transferencia savedShip = transferRepository.save(transfer);
 
-                auditService.registrarAccion("1", "SHIP_TRANSFER", "Transferencia", savedShip.getId(),
+                eventPublisher.publicarAuditoria("1", "SHIP_TRANSFER", "Transferencia", savedShip.getId(),
                                 "Mercancía en tránsito");
                 eventPublisher.publicarTransferenciaCreada(savedShip,
                                 transfer.getUsuarioSolicitaId() != null
@@ -171,7 +172,7 @@ public class TransferenciaServicioImpl implements TransferenciaServicio {
                 transfer.setEstado(EstadoTransferencia.EN_TRANSITO.name());
                 Transferencia savedShip = transferRepository.save(transfer);
 
-                auditService.registrarAccion("1", "SHIP_TRANSFER_CHANGES", "Transferencia", savedShip.getId(),
+                eventPublisher.publicarAuditoria("1", "SHIP_TRANSFER_CHANGES", "Transferencia", savedShip.getId(),
                                 "Mercancía en tránsito con cambios");
                 eventPublisher.publicarTransferenciaCreada(savedShip,
                                 transfer.getUsuarioSolicitaId() != null
@@ -186,7 +187,7 @@ public class TransferenciaServicioImpl implements TransferenciaServicio {
         transfer.setEstado(EstadoTransferencia.CANCELADO.name());
         Transferencia saved = transferRepository.save(transfer);
 
-        auditService.registrarAccion("1", "CANCEL_TRANSFER", "Transferencia", saved.getId(),
+        eventPublisher.publicarAuditoria("1", "CANCEL_TRANSFER", "Transferencia", saved.getId(),
                 "Transferencia cancelada");
 
         eventPublisher.publicarTransferenciaCreada(saved,
@@ -227,7 +228,7 @@ public class TransferenciaServicioImpl implements TransferenciaServicio {
                 transfer.setEstado(EstadoTransferencia.RECIBIDO.name());
                 Transferencia savedReceive = transferRepository.save(transfer);
 
-                auditService.registrarAccion("1", "RECEIVE_TRANSFER", "Transferencia", savedReceive.getId(),
+                eventPublisher.publicarAuditoria("1", "RECEIVE_TRANSFER", "Transferencia", savedReceive.getId(),
                                 "Recepción completada");
                 eventPublisher.publicarTransferenciaCreada(savedReceive,
                                 transfer.getUsuarioSolicitaId() != null
@@ -258,11 +259,41 @@ public class TransferenciaServicioImpl implements TransferenciaServicio {
                                 .map(this::toInfo);
         }
 
+        @Override
+        public Page<TransferenciaInformacionDTO> getTransfersByDestinoAndStatuses(Long sucursalDestinoId,
+                        List<String> statuses, Integer pagina, Integer porPagina) {
+                int pageNumber = (pagina != null) ? pagina : 0;
+                int pageSize = (porPagina != null && porPagina > 0) ? porPagina : 10;
+                Pageable pageable = PageRequest.of(pageNumber, pageSize);
+                return transferRepository
+                                .findTransfersBySucursalDestinoAndEstados(sucursalDestinoId, statuses, pageable)
+                                .map(this::toInfo);
+        }
+
+        @Override
+        public Page<TransferenciaInformacionDTO> getTransfersByOrigenAndStatuses(Long sucursalOrigenId,
+                        List<String> statuses, Integer pagina, Integer porPagina) {
+                int pageNumber = (pagina != null) ? pagina : 0;
+                int pageSize = (porPagina != null && porPagina > 0) ? porPagina : 10;
+                Pageable pageable = PageRequest.of(pageNumber, pageSize);
+                return transferRepository
+                                .findTransfersBySucursalOrigenAndEstados(sucursalOrigenId, statuses, pageable)
+                                .map(this::toInfo);
+        }
+
         private TransferenciaInformacionDTO toInfo(Transferencia t) {
                 List<TransferenciaInformacionDTO.ResumenDetalleDTO> items = t.getDetalles().stream()
-                                .map(d -> new TransferenciaInformacionDTO.ResumenDetalleDTO(
-                                                d.getProductoId(), d.getCantidadSolicitada(), d.getCantidadConfirmada(),
-                                                d.getCantidadRecibida(), d.getMotivoDiferencia()))
+                                .map(d -> {
+                                        Producto p = productRepository.findById(d.getProductoId()).orElse(null);
+                                        return new TransferenciaInformacionDTO.ResumenDetalleDTO(
+                                                        d.getProductoId(),
+                                                        p != null ? p.getNombre() : "Producto desconocido",
+                                                        p != null ? p.getSku() : "N/A",
+                                                        d.getCantidadSolicitada(),
+                                                        d.getCantidadConfirmada(),
+                                                        d.getCantidadRecibida(),
+                                                        d.getMotivoDiferencia());
+                                })
                                 .collect(Collectors.toList());
 
                 TransferenciaInformacionDTO.EnvioInfoDTO envioInfo = null;

@@ -41,20 +41,32 @@
 
     <!-- Filters Card -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+            <!-- Tipo de Movimiento -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo Movimiento</label>
+                <select [(ngModel)]="tipoRelacion" (change)="aplicarFiltros()"
+                    class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all">
+                    <option value="DESTINO">Recibidas (Destino)</option>
+                    <option value="ORIGEN">Enviadas (Origen)</option>
+                </select>
+            </div>
 
             <!-- Sucursal: Fija para la sucursal del usuario -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sucursal Destino</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ tipoRelacion === 'DESTINO' ? 'Sucursal Destino' : 'Sucursal Origen' }}
+                </label>
                 <div
-                    class="w-full flex items-center gap-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-lg px-4 py-2">
+                    class="w-full flex items-center gap-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-lg px-4 py-2.5">
                     <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
                         </path>
                     </svg>
-                    <span class="text-sm font-semibold text-blue-700 dark:text-blue-400 truncate">
+                    <span class="flex-1 text-sm font-semibold text-blue-700 dark:text-blue-400 truncate">
                         {{ nombreSucursalUsuario || 'Mi Sucursal' }}
                     </span>
                     <span
@@ -109,6 +121,7 @@
                         <th class="py-4 px-6 font-semibold text-sm text-black">ID</th>
                         <th class="py-4 px-6 font-semibold text-sm text-black">Sucursal Origen</th>
                         <th class="py-4 px-6 font-semibold text-sm text-black">Sucursal Destino</th>
+                        <th class="py-4 px-6 font-semibold text-sm text-black">Producto</th>
                         <th class="py-4 px-6 font-semibold text-sm text-black">Fecha Solicitud</th>
                         <th class="py-4 px-6 font-semibold text-sm text-black">Estado</th>
                         <th class="py-4 px-6 font-semibold text-sm text-black text-center">Acciones</th>
@@ -138,6 +151,17 @@
                                 </svg>
                                 {{ getNombreSucursal(t.idSucursalDestino) }}
                             </span>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div *ngIf="t.items && t.items.length > 0" class="flex flex-col">
+                                <span class="text-sm font-semibold text-gray-900 leading-tight">
+                                    {{ t.items[0].nombreProducto || 'Cargando...' }}
+                                </span>
+                                <span class="text-xs text-gray-500">
+                                    SKU: {{ t.items[0].skuProducto || 'N/A' }} | Cant: <span class="font-bold text-blue-600">{{ t.items[0].cantidadSolicitada }}</span>
+                                </span>
+                            </div>
+                            <span *ngIf="!t.items || t.items.length === 0" class="text-xs text-gray-400 italic">Sin productos</span>
                         </td>
                         <td class="py-4 px-6 text-sm text-gray-600 dark:text-gray-400">
                             {{ t.fechaSolicitud | date:'short' }}
@@ -204,7 +228,7 @@
                         </td>
                     </tr>
                     <tr *ngIf="transferencias.length === 0">
-                        <td colspan="6">
+                        <td colspan="7">
                             <div
                                 class="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
                                 <svg class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" fill="none"

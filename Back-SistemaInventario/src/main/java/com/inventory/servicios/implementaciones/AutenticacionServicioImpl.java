@@ -7,7 +7,7 @@ import com.inventory.modelo.dto.autenticacion.TokenDTO;
 import com.inventory.modelo.entidades.seguridad.Usuario;
 import com.inventory.repositorios.seguridad.UsuarioRepositorio;
 import com.inventory.servicios.interfaces.AutenticacionServicio;
-import com.inventory.servicios.interfaces.auditoria.AuditoriaServicio;
+import com.inventory.eventos.PublicadorEventos;
 import lombok.RequiredArgsConstructor;
 import com.inventory.config.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class AutenticacionServicioImpl implements AutenticacionServicio {
     private final UsuarioRepositorio userRepository;
     private final JWTUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
-    private final AuditoriaServicio auditService;
+    private final PublicadorEventos eventPublisher;
 
     /**
      * Valida las credenciales y genera un token JWT si son correctas.
@@ -55,7 +55,7 @@ public class AutenticacionServicioImpl implements AutenticacionServicio {
         // Generar y retornar el token JWT
         TokenDTO token = new TokenDTO(jwtUtils.generarToken(user.getCorreo(), claims));
         
-        auditService.registrarAccion(user.getId().toString(), "LOGIN", "Usuario", user.getId(), "Sesión iniciada correctamente");
+        eventPublisher.publicarAuditoria(user.getId().toString(), "LOGIN", "Usuario", user.getId(), "Sesión iniciada correctamente");
         
         return token;
     }
@@ -81,7 +81,7 @@ public class AutenticacionServicioImpl implements AutenticacionServicio {
 
         Usuario saved = userRepository.save(nuevoUsuario);
 
-        auditService.registrarAccion("SISTEMA", "REGISTER_USER", "Usuario", saved.getId(), "Usuario registrado exitosamente con rol " + dto.rol().name());
+        eventPublisher.publicarAuditoria("SISTEMA", "REGISTER_USER", "Usuario", saved.getId(), "Usuario registrado exitosamente con rol " + dto.rol().name());
 
         return "Usuario registrado exitosamente con rol " + dto.rol().name();
     }

@@ -40,4 +40,23 @@ public interface TransferenciaRepositorio extends JpaRepository<Transferencia, L
             @org.springframework.data.repository.query.Param("fechaInicio") java.time.LocalDateTime fechaInicio,
             @org.springframework.data.repository.query.Param("fechaFin") java.time.LocalDateTime fechaFin,
             Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Query("""
+    SELECT t FROM Transferencia t
+    WHERE (:sucursalDestinoId IS NULL OR t.sucursalDestinoId = :sucursalDestinoId)
+      AND (t.estado IN :estados)
+""")
+    Page<Transferencia> findTransfersBySucursalDestinoAndEstados(
+            @org.springframework.data.repository.query.Param("sucursalDestinoId") Long sucursalDestinoId,
+            @org.springframework.data.repository.query.Param("estados") List<String> estados,
+            Pageable pageable);
+    @org.springframework.data.jpa.repository.Query("""
+    SELECT t FROM Transferencia t
+    WHERE (:sucursalOrigenId IS NULL OR t.sucursalOrigenId = :sucursalOrigenId)
+      AND (t.estado IN :estados)
+""")
+    Page<Transferencia> findTransfersBySucursalOrigenAndEstados(
+            @org.springframework.data.repository.query.Param("sucursalOrigenId") Long sucursalOrigenId,
+            @org.springframework.data.repository.query.Param("estados") List<String> estados,
+            Pageable pageable);
 }

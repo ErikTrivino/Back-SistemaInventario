@@ -21,6 +21,7 @@ export interface OrdenAgrupada {
   idProveedor: number;
   estado: string;
   detalles: CompraDetalleLocal[];
+  total: number;
   expandida?: boolean;
 }
 
@@ -143,6 +144,7 @@ export class GestionOrdenesCompraComponent implements OnInit {
                 idProveedor: item.idProveedor,
                 estado: item.estado, // Mantenemos el estado de la primera fila como general
                 detalles: [],
+                total: 0,
                 expandida: false
               });
             }
@@ -151,7 +153,12 @@ export class GestionOrdenesCompraComponent implements OnInit {
               ...item,
               cantidadRecibiendo: 0
             };
-            map.get(item.idOrdenCompra)?.detalles.push(detalleLocal);
+            const ordMap = map.get(item.idOrdenCompra);
+            if (ordMap) {
+              ordMap.detalles.push(detalleLocal);
+              // Sumar al total: cantidadSolicitada * precioUnitario
+              ordMap.total += (item.cantidadSolicitada * item.precioUnitario);
+            }
           });
 
           this.ordenesAgrupadas = Array.from(map.values());

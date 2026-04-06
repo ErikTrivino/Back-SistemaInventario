@@ -10,5 +10,6 @@ public record DetalleProdcutoCrearDTO(
         @DecimalMin("0.00") BigDecimal cantidadInicial,
         @DecimalMin("0.00") BigDecimal cantidadMinima,
         Long idSucursal
+
 ) {
 }

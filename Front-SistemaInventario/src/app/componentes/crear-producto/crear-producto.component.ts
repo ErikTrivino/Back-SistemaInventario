@@ -112,7 +112,7 @@ export class CrearProductoComponent implements OnInit {
         }))
       };
 
-      console.log(dto);
+
       this.inventarioService.createProduct(dto).subscribe({
         next: (data: MensajeDTO) => {
           Swal.fire('Éxito', 'Producto creado correctamente', 'success');

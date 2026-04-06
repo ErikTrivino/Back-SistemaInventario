@@ -32,12 +32,12 @@ public interface InventarioRepositorio extends JpaRepository<Inventario, Inventa
 
     @Query("SELECT new com.inventory.modelo.dto.inventario.InventarioRespuestaDTO(" +
             "i.producto.id, i.producto.nombre, i.producto.sku, i.producto.unidadMedidaBase, i.producto.descripcion, i.activo, " +
-            "i.sucursal.id, i.stock, i.stockMinimo, i.producto.precioCostoPromedio, null) " +
+            "i.sucursal.id, i.stock, i.stockMinimo, i.precioCostoPromedio, null) " +
             "FROM Inventario i " +
             "WHERE i.sucursal.id = :sucursalId AND (:activo IS NULL OR i.activo = :activo)")
     org.springframework.data.domain.Page<com.inventory.modelo.dto.inventario.InventarioRespuestaDTO> findCatalogByBranch(@Param("sucursalId") Long sucursalId, @Param("activo") Boolean activo, org.springframework.data.domain.Pageable pageable);
     @Query("SELECT new com.inventory.modelo.dto.inventario.ProductoDetallePorSucursalDTO(" +
-           "i.producto.id, i.producto.nombre, i.producto.descripcion, i.producto.sku, i.producto.unidadMedidaBase, i.producto.precioCostoPromedio, " +
+           "i.producto.id, i.producto.nombre, i.producto.descripcion, i.producto.sku, i.producto.unidadMedidaBase, i.precioCostoPromedio, " +
            "i.stock, i.activo, i.sucursal.id, " +
            "(SELECT MIN(pp.proveedorId) FROM ProductoProveedor pp WHERE pp.productoId = i.producto.id)) " +
            "FROM Inventario i " +

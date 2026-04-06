@@ -8,7 +8,7 @@ import com.inventory.repositorios.proveedores.ProveedorRepositorio;
 import com.inventory.repositorios.proveedores.ProductoProveedorRepositorio;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.inventory.servicios.interfaces.auditoria.AuditoriaServicio;
+import com.inventory.eventos.PublicadorEventos;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,7 +17,7 @@ import org.springframework.data.domain.PageRequest;
 public class ProveedorServicioImpl implements ProveedorServicio {
     private final ProveedorRepositorio supplierRepository;
     private final ProductoProveedorRepositorio supplierProductRepository;
-    private final AuditoriaServicio auditService;
+    private final PublicadorEventos eventPublisher;
 
     /** RF-38: Crear proveedor con NIT único y estado activo por defecto. */
     @Override
@@ -34,7 +34,7 @@ public class ProveedorServicioImpl implements ProveedorServicio {
                 .activo(true)
                 .build();
         ProveedorInformacionDTO response = toInfo(supplierRepository.save(supplier));
-        auditService.registrarAccion("1", "CREATE_SUPPLIER", "Proveedor", response.id(), "Proveedor creado: " + response.nitRut());
+        eventPublisher.publicarAuditoria("1", "CREATE_SUPPLIER", "Proveedor", response.id(), "Proveedor creado: " + response.nitRut());
         return response;
     }
 
@@ -49,7 +49,7 @@ public class ProveedorServicioImpl implements ProveedorServicio {
         supplier.setActivo(dto.activo());
         supplier.setEmail(dto.email());
         Proveedor saved = supplierRepository.save(supplier);
-        auditService.registrarAccion("1", "UPDATE_SUPPLIER", "Proveedor", saved.getId(), "Proveedor actualizado: " + saved.getRazonSocial());
+        eventPublisher.publicarAuditoria("1", "UPDATE_SUPPLIER", "Proveedor", saved.getId(), "Proveedor actualizado: " + saved.getRazonSocial());
         return toInfo(saved);
     }
 
@@ -61,7 +61,7 @@ public class ProveedorServicioImpl implements ProveedorServicio {
                 .orElseThrow(() -> new RuntimeException("Proveedor no encontrado: " + id));
         supplier.setActivo(!supplier.isActivo());
         Proveedor saved = supplierRepository.save(supplier);
-        auditService.registrarAccion("1", "TOGGLE_SUPPLIER_STATUS", "Proveedor", saved.getId(), "Estado de proveedor cambiado a: " + (saved.isActivo() ? "Activo" : "Inactivo"));
+        eventPublisher.publicarAuditoria("1", "TOGGLE_SUPPLIER_STATUS", "Proveedor", saved.getId(), "Estado de proveedor cambiado a: " + (saved.isActivo() ? "Activo" : "Inactivo"));
         return toInfo(saved);
     }
 
@@ -113,7 +113,7 @@ public class ProveedorServicioImpl implements ProveedorServicio {
                 .build();
 
         ProductoProveedor saved = supplierProductRepository.save(pp);
-        auditService.registrarAccion("1", "REGISTER_PRICE_LIST", "ProductoProveedor", saved.getId(), "Lista de precios registrada para Producto ID: " + saved.getProductoId());
+        eventPublisher.publicarAuditoria("1", "REGISTER_PRICE_LIST", "ProductoProveedor", saved.getId(), "Lista de precios registrada para Producto ID: " + saved.getProductoId());
         return toPPInfo(saved);
     }
 

@@ -4,7 +4,7 @@ import com.inventory.modelo.enums.EstadoCompra;
 import com.inventory.modelo.enums.EstadoTransferencia;
 import com.inventory.servicios.interfaces.compras.CompraServicio;
 import com.inventory.servicios.interfaces.inventario.InventarioServicio;
-import com.inventory.servicios.interfaces.auditoria.AuditoriaServicio;
+import com.inventory.eventos.PublicadorEventos;
 import com.inventory.repositorios.compras.OrdenCompraRepositorio;
 import com.inventory.repositorios.compras.DetalleCompraRepositorio;
 import com.inventory.modelo.dto.compras.*;
@@ -26,7 +26,7 @@ public class CompraServicioImpl implements CompraServicio {
     private final OrdenCompraRepositorio purchaseOrderRepository;
     private final DetalleCompraRepositorio purchaseDetailRepository;
     private final InventarioServicio inventoryService;
-    private final AuditoriaServicio auditService;
+    private final PublicadorEventos eventPublisher;
 
     @Override
     @Transactional
@@ -73,7 +73,7 @@ public class CompraServicioImpl implements CompraServicio {
             purchaseDetailRepository.save(d);
         }
 
-        auditService.registrarAccion(userId.toString(), "CREATE", "OrdenCompra", saved.getId(), "Created PO");
+        eventPublisher.publicarAuditoria(userId.toString(), "CREATE", "OrdenCompra", saved.getId(), "Created PO");
         return toInfo(saved);
     }
 
@@ -114,7 +114,7 @@ public class CompraServicioImpl implements CompraServicio {
 
         order.setEstado(EstadoCompra.RECIBIDO.name());
         purchaseOrderRepository.save(order);
-        auditService.registrarAccion("1", "RECEIVE", "OrdenCompra", order.getId(), "Received PO details and updated stock atomically.");
+        eventPublisher.publicarAuditoria("1", "RECEIVE", "OrdenCompra", order.getId(), "Received PO details and updated stock atomically.");
     }
 
     @Override

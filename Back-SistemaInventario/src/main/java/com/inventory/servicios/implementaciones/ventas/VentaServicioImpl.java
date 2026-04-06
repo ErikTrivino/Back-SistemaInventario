@@ -3,7 +3,6 @@ package com.inventory.servicios.implementaciones.ventas;
 import com.inventory.servicios.interfaces.ventas.VentaServicio;
 import com.inventory.servicios.interfaces.ventas.ComprobanteServicio;
 import com.inventory.servicios.interfaces.inventario.InventarioServicio;
-import com.inventory.servicios.interfaces.auditoria.AuditoriaServicio;
 import com.inventory.eventos.PublicadorEventos;
 import com.inventory.repositorios.ventas.VentaRepositorio;
 import com.inventory.repositorios.ventas.DetalleVentaRepositorio;
@@ -29,7 +28,6 @@ public class VentaServicioImpl implements VentaServicio {
     private final DetalleVentaRepositorio detailRepository;
     private final InventarioServicio inventoryService;
     private final InventarioRepositorio inventoryRepository;
-    private final AuditoriaServicio auditService;
     private final PublicadorEventos eventPublisher;
     private final ComprobanteServicio receiptService;
 
@@ -111,7 +109,7 @@ public class VentaServicioImpl implements VentaServicio {
         saleRepository.save(saved);
 
         eventPublisher.publicarVentaCompletada(saved, dto.idResponsable().toString());
-        auditService.registrarAccion(dto.idResponsable().toString(), "CREATE", "Venta", saved.getId(), "Comercialización procesada");
+        eventPublisher.publicarAuditoria(dto.idResponsable().toString(), "CREATE", "Venta", saved.getId(), "Comercialización procesada");
         
         return toInfo(saved);
     }

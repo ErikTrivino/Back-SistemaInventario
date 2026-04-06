@@ -49,14 +49,19 @@ export class DashboardComponent implements OnInit {
   @ViewChild('chart') chart!: ChartComponent;
 
   resumen: any = {
-    totalProductos: 0,
-    bajoStock: 0,
+    ingresoHoy: 0,
+    ventasHoy: 0,
+    productosAgotados: 0,
+    productosEnStockMinimo: 0,
+    ordenesPendientesRecepcion: 0,
     transferenciasPendientes: 0,
-    ventasHoy: 0
+    transferenciasEnTransito: 0,
+    totalProductos: 0
   };
 
   actividades: any[] = [];
   alertasStock: AlertaStockDTO[] = [];
+  topProductos: any[] = [];
 
   // Configuración de gráficos
   chartVentas: Partial<ChartOptions> = {};
@@ -86,6 +91,7 @@ export class DashboardComponent implements OnInit {
       next: (data: MensajeDTO) => {
         if (!data.error && data.respuesta) {
           this.resumen = data.respuesta;
+
         }
       }
     });
@@ -97,6 +103,7 @@ export class DashboardComponent implements OnInit {
         if (!data.error && data.respuesta) {
           // Si la respuesta es una página, tomamos el contenido
           this.actividades = data.respuesta.content || data.respuesta;
+
         }
       }
     });
@@ -111,7 +118,7 @@ export class DashboardComponent implements OnInit {
           this.alertasStock = content;
 
           // Actualizamos el resumen con el conteo total de alertas
-          this.resumen.bajoStock = data.respuesta.totalElements || content.length || 0;
+          this.resumen.productosEnStockMinimo = data.respuesta.totalElements || content.length || 0;
 
         }
       }
@@ -141,7 +148,9 @@ export class DashboardComponent implements OnInit {
     this.reporteService.generarAnalisisRotacion(mesActual, anioActual, 0, 5).subscribe({
       next: (data: MensajeDTO) => {
         if (!data.error && data.respuesta) {
-          this.actualizarGraficoProductos(data.respuesta.content || data.respuesta);
+          // El objeto respuesta contiene { anio, mes, productos: { content: [...] } }
+          const lista = data.respuesta.productos?.content || data.respuesta.content || data.respuesta;
+          this.actualizarGraficoProductos(lista);
         }
       }
     });
@@ -170,7 +179,7 @@ export class DashboardComponent implements OnInit {
 
     this.chartProductos = {
       series: [{ name: "Ventas", data: [0, 0, 0, 0, 0] }],
-      chart: { height: 350, type: "bar", toolbar: { show: false } },
+      chart: { height: 250, type: "bar", toolbar: { show: false } },
       plotOptions: { bar: { borderRadius: 4, horizontal: true } },
       dataLabels: { enabled: true },
       xaxis: { categories: ["P1", "P2", "P3", "P4", "P5"] },
@@ -196,7 +205,8 @@ export class DashboardComponent implements OnInit {
   }
 
   private actualizarGraficoProductos(productos: any[]): void {
-    if (productos && productos.length > 0) {
+    if (productos && Array.isArray(productos) && productos.length > 0) {
+      this.topProductos = productos;
       this.chartProductos.series = [{
         name: "Unidades",
         data: productos.map(p => p.totalSalidas)
@@ -204,6 +214,17 @@ export class DashboardComponent implements OnInit {
       this.chartProductos.xaxis = {
         categories: productos.map(p => p.nombreProducto)
       };
+    } else {
+      this.topProductos = [];
+    }
+  }
+
+  getBadgeClass(clasificacion: string): string {
+    switch (clasificacion?.toUpperCase()) {
+      case 'A': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      case 'B': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'C': return 'bg-amber-100 text-amber-700 border-amber-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   }
 
@@ -218,13 +239,14 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  getIconForActivity(tipo: string): string {
-    switch (tipo?.toLowerCase()) {
-      case 'venta': return 'fa-shopping-cart text-green-500';
-      case 'transferencia': return 'fa-exchange-alt text-blue-500';
-      case 'ajuste': return 'fa-tools text-orange-500';
-      case 'login': return 'fa-user-check text-purple-500';
-      default: return 'fa-info-circle text-gray-500';
+  getIconForActivity(accion: string): string {
+    switch (accion?.toUpperCase()) {
+      case 'CREATE': return 'fa-plus-circle text-green-500';
+      case 'UPDATE': return 'fa-edit text-blue-500';
+      case 'DELETE': return 'fa-trash-alt text-red-500';
+      case 'LOGIN': return 'fa-sign-in-alt text-purple-500';
+      case 'LOGOUT': return 'fa-sign-out-alt text-gray-500';
+      default: return 'fa-history text-indigo-500';
     }
   }
 }

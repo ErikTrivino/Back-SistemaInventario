@@ -137,12 +137,28 @@
                       </button>
                     </div>
                     <div class="flex items-center justify-between">
-                      <div class="flex items-center gap-2">
-                        <button (click)="updateQuantity(i, item.cantidad - 1)" class="w-6 h-6 rounded bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200">-</button>
-                        <span class="text-sm font-medium w-6 text-center">{{item.cantidad}}</span>
-                        <button (click)="updateQuantity(i, item.cantidad + 1)" class="w-6 h-6 rounded bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200">+</button>
+                      <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-2">
+                          <button (click)="updateQuantity(i, item.cantidad - 1)" class="w-6 h-6 rounded bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200">-</button>
+                          <span class="text-sm font-medium w-6 text-center">{{item.cantidad}}</span>
+                          <button (click)="updateQuantity(i, item.cantidad + 1)" class="w-6 h-6 rounded bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200">+</button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <span class="text-[10px] font-bold text-gray-400 uppercase">Desc %</span>
+                          <input 
+                            type="number" 
+                            [ngModel]="item.descuentoPorcentaje" 
+                            (ngModelChange)="updateDiscount(i, $event)"
+                            class="w-12 h-6 text-xs border border-gray-200 rounded px-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            min="0" max="100">
+                        </div>
                       </div>
-                      <span class="text-sm font-bold text-gray-800">${{item.subtotal.toLocaleString()}}</span>
+                      <div class="text-right">
+                        @if (item.descuentoPorcentaje > 0) {
+                          <div class="text-[10px] text-gray-400 line-through">${{(item.cantidad * item.precioUnitario).toLocaleString()}}</div>
+                        }
+                        <span class="text-sm font-bold text-gray-800">${{item.subtotal.toLocaleString()}}</span>
+                      </div>
                     </div>
                   </div>
                 }

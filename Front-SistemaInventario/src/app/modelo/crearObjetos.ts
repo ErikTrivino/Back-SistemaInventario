@@ -142,8 +142,8 @@ export interface DetalleVentaCrearDTO {
   idProducto: number;
   cantidad: number;
   precioUnitario: number;
-  descuentoPorcentaje?: number; // opcional
-  listaPrecioUsada?: string;    // opcional
+  descuentoPorcentaje?: number;
+  listaPrecioUsada?: string;
 }
 
 export interface VentaCrearDTO {

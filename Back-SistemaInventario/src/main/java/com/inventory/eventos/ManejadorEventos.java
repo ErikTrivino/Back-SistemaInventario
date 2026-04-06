@@ -26,6 +26,30 @@ import org.springframework.stereotype.Component;
 public class ManejadorEventos {
 
     private final NotificacionEventoRepositorio notificacionRepositorio;
+    private final com.inventory.servicios.interfaces.auditoria.AuditoriaServicio auditoriaServicio;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // AUDITORÍA
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Reacciona ante eventos de auditoría para registrarlos en la base de datos.
+     * Se ejecuta de forma asíncrona para no afectar el rendimiento de la transacción principal.
+     */
+    @Async
+    @EventListener
+    public void manejarAuditoria(AuditoriaEvento evento) {
+        log.debug("[AUDITORÍA] Registrando acción: {} | Entidad: {} (ID={}) | Detalles: {}",
+                evento.getAccion(), evento.getEntidad(), evento.getEntidadId(), evento.getDetalles());
+
+        auditoriaServicio.registrarAccion(
+                evento.getUsuario(),
+                evento.getAccion(),
+                evento.getEntidad(),
+                evento.getEntidadId(),
+                evento.getDetalles()
+        );
+    }
 
     // ─────────────────────────────────────────────────────────────────────────
     // STOCK ACTUALIZADO

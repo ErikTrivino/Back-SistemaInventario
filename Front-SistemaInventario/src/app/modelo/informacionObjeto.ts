@@ -90,6 +90,8 @@ export interface EnvioInfoDTO {
 
 export interface ResumenDetalleDTO {
   idProducto: number;
+  nombreProducto?: string;
+  skuProducto?: string;
   cantidadSolicitada: number;
   cantidadConfirmada?: number;
   cantidadRecibida?: number;

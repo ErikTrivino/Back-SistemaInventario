@@ -75,6 +75,19 @@ public class PublicadorEventos {
         ));
     }
 
+    /**
+     * Publica un evento de auditoría para registrar una acción en el sistema.
+     *
+     * @param usuario   Nombre o ID del usuario que realiza la acción.
+     * @param accion    Acción realizada (CREAR, ACTUALIZAR, ELIMINAR, etc.).
+     * @param entidad   Nombre de la entidad afectada.
+     * @param entidadId ID de la instancia de la entidad afectada.
+     * @param detalles  Descripción de los cambios o detalles adicionales.
+     */
+    public void publicarAuditoria(String usuario, String accion, String entidad, Long entidadId, String detalles) {
+        publisher.publishEvent(new AuditoriaEvento(this, usuario, accion, entidad, entidadId, detalles));
+    }
+
     // ── Métodos de compatibilidad legacy (deprecated) ──────────────────────────
 
     /** @deprecated Usar {@link #publicarActualizacionStock(Inventario, String)} */

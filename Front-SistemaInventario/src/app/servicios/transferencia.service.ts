@@ -61,4 +61,17 @@ export class TransferenciaService {
     if (pagina !== undefined) params = params.set('pagina', pagina.toString());
     return this.http.get<MensajeDTO>(`${this.apiUrl}/entrantes`, { params });
   }
+
+  getPorSucursalDestino(sucursalDestino: number, pagina?: number, porPagina: number = 10): Observable<MensajeDTO> {
+    let params = new HttpParams().set('sucursalDestino', sucursalDestino.toString()).set('porPagina', porPagina.toString());
+    if (pagina !== undefined) params = params.set('pagina', pagina.toString());
+    return this.http.get<MensajeDTO>(`${this.apiUrl}/sucursalDestino`, { params });
+  }
+
+  getPorSucursalOrigen(sucursalOrigen: number, pagina?: number, porPagina: number = 10): Observable<MensajeDTO> {
+    let params = new HttpParams().set('sucursalOrigen', sucursalOrigen.toString()).set('porPagina', porPagina.toString());
+    if (pagina !== undefined) params = params.set('pagina', pagina.toString());
+    return this.http.get<MensajeDTO>(`${this.apiUrl}/sucursalOrigen`, { params });
+  }
 }
+

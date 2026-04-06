@@ -72,7 +72,9 @@ export class GestionVentasComponent implements OnInit {
           if (this.activeTab === 'new-sale') {
             this.loadCatalog();
           }
+
           this.selectedBranchId = this.userSucursalId;
+
         },
         error: (err) => console.error('Error loading user data', err)
       });
@@ -92,6 +94,7 @@ export class GestionVentasComponent implements OnInit {
     this.inventarioService.getCatalogo(this.userSucursalId, this.paginaActual + 1, this.tamanoPagina, this.filtroActivo).subscribe({
       next: (data: MensajeDTO) => {
         let content = data.respuesta.content || data.respuesta;
+
 
         if (Array.isArray(content)) {
           this.catalog = content.map((item: any) => ({
@@ -168,13 +171,15 @@ export class GestionVentasComponent implements OnInit {
           const index = this.currentSaleItems.findIndex(item => item.idProducto === product.id);
           if (index !== -1) {
             this.currentSaleItems[index].cantidad = totalQuantity;
-            this.currentSaleItems[index].subtotal = totalQuantity * product.precioVenta;
+            const discount = this.currentSaleItems[index].descuentoPorcentaje || 0;
+            this.currentSaleItems[index].subtotal = (totalQuantity * product.precioVenta) * (1 - discount / 100);
           } else {
             this.currentSaleItems.push({
               idProducto: product.id,
               nombre: product.nombre,
               precioUnitario: product.precioVenta,
               cantidad: totalQuantity,
+              descuentoPorcentaje: 0,
               subtotal: totalQuantity * product.precioVenta
             });
           }
@@ -202,14 +207,25 @@ export class GestionVentasComponent implements OnInit {
           Swal.fire('Atención', res.respuesta, 'warning');
         } else {
           item.cantidad = newQty;
-          item.subtotal = newQty * item.precioUnitario;
+          const discount = item.descuentoPorcentaje || 0;
+          item.subtotal = (newQty * item.precioUnitario) * (1 - discount / 100);
         }
+
       }
     });
   }
 
   get totalSale(): number {
     return this.currentSaleItems.reduce((acc, item) => acc + item.subtotal, 0);
+  }
+
+  updateDiscount(index: number, newDiscount: number) {
+    if (newDiscount < 0) newDiscount = 0;
+    if (newDiscount > 100) newDiscount = 100;
+    
+    const item = this.currentSaleItems[index];
+    item.descuentoPorcentaje = newDiscount;
+    item.subtotal = (item.cantidad * item.precioUnitario) * (1 - newDiscount / 100);
   }
 
   confirmSale() {
@@ -224,7 +240,8 @@ export class GestionVentasComponent implements OnInit {
       detalles: this.currentSaleItems.map(item => ({
         idProducto: item.idProducto,
         cantidad: item.cantidad,
-        precioUnitario: item.precioUnitario
+        precioUnitario: item.precioUnitario,
+        descuentoPorcentaje: item.descuentoPorcentaje
       }))
     };
 
@@ -284,6 +301,7 @@ export class GestionVentasComponent implements OnInit {
             this.salesHistory = (res.respuesta.content || res.respuesta || []) as VentaInformacionDTO[];
           }
           this.isLoading = false;
+          console.log(this.salesHistory);
         },
         error: (err) => {
           console.error('Error history branch', err);

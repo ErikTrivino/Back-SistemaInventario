@@ -20,6 +20,8 @@ public record TransferenciaInformacionDTO(
      */
     public record ResumenDetalleDTO(
             Long idProducto,
+            String nombreProducto,
+            String skuProducto,
             java.math.BigDecimal cantidadSolicitada,
             java.math.BigDecimal cantidadConfirmada,
             java.math.BigDecimal cantidadRecibida,

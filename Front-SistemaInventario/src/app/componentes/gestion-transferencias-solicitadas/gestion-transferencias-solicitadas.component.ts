@@ -9,7 +9,7 @@ import { InventarioService } from '../../servicios/inventario.service';
 import { UsuarioService } from '../../servicios/usuario.service';
 import { TokenService } from '../../servicios/token.service';
 import { TransportistaService } from '../../servicios/transportista.service';
-import { InformacionTransferencia, InformacionProducto, InformacionTransportistaDTO } from '../../modelo/informacionObjeto';
+import { InformacionTransferencia, InformacionProducto, InformacionTransportistaDTO, Page, ResumenDetalleDTO } from '../../modelo/informacionObjeto';
 import { TransferenciaCrearDTO, TransferenciaPrepararDTO, TransferenciaConfirmarEnvioDTO, TransferenciaRecepcionDTO, TransferenciaConfirmarEnvioConCambiosDTO, ClasificacionRuta } from '../../modelo/crearObjetos';
 import { TransferenciaCancelarDTO } from '../../modelo/editarObjeto';
 import { MensajeDTO } from '../../modelo/mensaje-dto';
@@ -33,6 +33,7 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
 
   // Filtros
   branchIdSeleccionada: number = 0;
+  tipoRelacion: 'DESTINO' | 'ORIGEN' = 'DESTINO'; // DESTINO = Recibidas, ORIGEN = Enviadas
   estadoSeleccionado: string = '';
   fechaDesde: string = '';
   fechaHasta: string = '';
@@ -126,41 +127,56 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
   cargar(): void {
     this.loading = true;
 
-    // Convertir fechas vacías a undefined para el servicio
-    const desde = this.fechaDesde ? new Date(this.fechaDesde).toISOString() : undefined;
-    const hasta = this.fechaHasta ? new Date(this.fechaHasta).toISOString() : undefined;
-    const estado = this.estadoSeleccionado || undefined;
+    if (this.tipoRelacion === 'DESTINO') {
+      this.svc.getPorSucursalDestino(
+        this.branchIdSeleccionada,
+        this.paginaActual,
+        this.tamanoPagina
+      ).subscribe({
+        next: (data: MensajeDTO) => {
 
-    this.svc.getEntrantes(
-      this.branchIdSeleccionada,
-      estado,
-      desde,
-      hasta,
-      this.paginaActual,
-      this.tamanoPagina
-    ).subscribe({
-      next: (data: MensajeDTO) => {
+          this.procesarRespuesta(data);
+        },
+        error: (err) => this.manejarError(err)
+      });
+    } else {
+      this.svc.getPorSucursalOrigen(
+        this.branchIdSeleccionada,
+        this.paginaActual,
+        this.tamanoPagina
+      ).subscribe({
+        next: (data: MensajeDTO) => {
 
-        const respuesta = data.respuesta;
-        if (respuesta?.content) {
-          this.transferencias = respuesta.content;
-          this.totalElementos = respuesta.totalElements;
-          this.totalPaginas = respuesta.totalPages;
-          this.paginaActual = respuesta.number;
-        } else {
-          this.transferencias = respuesta || [];
-          this.totalElementos = this.transferencias.length;
-          this.totalPaginas = 1;
-          this.paginaActual = 0;
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-        Swal.fire('Error', 'No se pudieron cargar las transferencias', 'error');
-      }
-    });
+          this.procesarRespuesta(data);
+        },
+        error: (err) => this.manejarError(err)
+      });
+    }
+  }
+
+  private procesarRespuesta(data: MensajeDTO): void {
+    const respuesta = data.respuesta;
+
+    if (respuesta && typeof respuesta === 'object' && 'content' in respuesta) {
+      console.log('Datos transferencias (DESTINO):', respuesta);
+      const page = respuesta as Page<InformacionTransferencia>;
+      this.transferencias = page.content;
+      this.totalElementos = page.totalElements;
+      this.totalPaginas = page.totalPages;
+      this.paginaActual = page.number;
+    } else {
+      this.transferencias = (respuesta as InformacionTransferencia[]) || [];
+      this.totalElementos = this.transferencias.length;
+      this.totalPaginas = 1;
+      this.paginaActual = 0;
+    }
+    this.loading = false;
+  }
+
+  private manejarError(err: any): void {
+    console.error(err);
+    this.loading = false;
+    Swal.fire('Error', 'No se pudieron cargar las transferencias', 'error');
   }
 
   onCambioPagina(p: number) {
@@ -232,6 +248,9 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
         </div>`
       ).join('');
 
+    // Filtrar sucursales para no mostrar la propia como origen
+    const sucursalesOrigen = this.sucursales.filter(s => s.id !== this.sucursalUsuario);
+
     const { value: formValues } = await Swal.fire({
       title: 'Solicitar Transferencia',
       width: 520,
@@ -239,13 +258,18 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
   <div style="text-align: left; display: flex; flex-direction: column; gap: 16px; padding: 4px 2px;">
 
     <div style="display: flex; flex-direction: column; gap: 6px;">
-      <label style="font-weight: 600; font-size: 13px;">ID Sucursal Origen</label>
-      <input id="swal-orig" class="swal2-input" type="number" placeholder="Ej: 1" style="margin: 0; width: 100%;">
+      <label style="font-weight: 600; font-size: 13px;">Sucursal Origen</label>
+      <select id="swal-orig" class="swal2-input" style="margin: 0; width: 100%;">
+        <option value="" disabled selected>Seleccione sucursal origen</option>
+        ${sucursalesOrigen.map(s => `<option value="${s.id}">${s.nombre} (ID: ${s.id})</option>`).join('')}
+      </select>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 6px;">
-      <label style="font-weight: 600; font-size: 13px;">ID Sucursal Destino</label>
-      <input id="swal-dest" class="swal2-input" type="number" placeholder="Ej: 2" style="margin: 0; width: 100%;">
+      <label style="font-weight: 600; font-size: 13px;">Sucursal Destino (Tu Sucursal)</label>
+      <input id="swal-dest-name" class="swal2-input" type="text" value="${this.nombreSucursalUsuario}" readonly 
+        style="margin: 0; width: 100%; background-color: #f3f4f6; cursor: not-allowed; border: 1px solid #d1d5db;">
+      <input id="swal-dest" type="hidden" value="${this.sucursalUsuario}">
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -304,13 +328,13 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
       confirmButtonText: 'Solicitar',
       cancelButtonText: 'Cancelar',
       preConfirm: () => {
-        const orig = (document.getElementById('swal-orig') as HTMLInputElement).value;
+        const orig = (document.getElementById('swal-orig') as HTMLSelectElement).value;
         const dest = (document.getElementById('swal-dest') as HTMLInputElement).value;
         const prod = (document.getElementById('swal-prod-id') as HTMLInputElement).value;
         const cant = (document.getElementById('swal-cant') as HTMLInputElement).value;
 
         if (!orig || !dest) {
-          Swal.showValidationMessage('Los IDs de sucursal son obligatorios');
+          Swal.showValidationMessage('La sucursal de origen es obligatoria');
           return false;
         }
         if (!prod) {
@@ -332,7 +356,7 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
 
     if (formValues) {
       const dto: TransferenciaCrearDTO = {
-        idSucursalOrigen: this.branchIdSeleccionada,
+        idSucursalOrigen: formValues.origen,
         idSucursalDestino: formValues.destino,
         items: [
           {
@@ -356,20 +380,53 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
   }
 
   async prepararTransferencia(t: InformacionTransferencia) {
-    const cantSol = t.items && t.items.length > 0 ? t.items[0].cantidadSolicitada : 1;
+    const item = t.items && t.items.length > 0 ? t.items[0] : null;
+    const cantSol = item ? (item.cantidadSolicitada || 0) : 0;
+    const nombreProd = item?.nombreProducto || 'Producto desconocido';
+    const skuProd = item?.skuProducto || 'N/A';
+    const idProd = item?.idProducto || 'N/A';
 
     const { value: formValues } = await Swal.fire({
       title: 'Preparar Transferencia',
+      width: 550,
       html: `
         <div style="text-align: left; display: flex; flex-direction: column; gap: 16px; padding: 4px 2px;">
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-weight: 600; font-size: 13px;">Cantidad Confirmada</label>
-            <input id="swal-prep-cant" class="swal2-input" type="number" step="0.01" value="${cantSol}" style="margin: 0; width: 100%;">
+          
+          <!-- Información del Producto Solicitado -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+              <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; flex-shrink: 0;">
+                ${nombreProd.charAt(0).toUpperCase()}
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <h4 style="margin: 0; color: #1e293b; font-size: 16px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nombreProd}</h4>
+                <div style="display: flex; gap: 8px; margin-top: 2px;">
+                   <span style="background: #eff6ff; color: #1e40af; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600;">SKU: ${skuProd}</span>
+                   <span style="background: #f1f5f9; color: #475569; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600;">ID: ${idProd}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div style="background: white; padding: 10px 14px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                <p style="margin: 0; font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Cant. Solicitada</p>
+                <p style="margin: 2px 0 0 0; font-size: 20px; color: #4f46e5; font-weight: 800;">${cantSol}</p>
+              </div>
+              <div style="background: white; padding: 10px 14px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                <p style="margin: 0; font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Sucursal Destino</p>
+                <p style="margin: 2px 0 0 0; font-size: 14px; color: #1e293b; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${this.getNombreSucursal(t.idSucursalDestino)}</p>
+              </div>
+            </div>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-weight: 600; font-size: 13px;">Clasificación de Ruta</label>
-            <select id="swal-prep-clasif" class="swal2-input" style="margin: 0; width: 100%;">
+            <label style="font-weight: 600; font-size: 13px; color: #334155;">Cantidad Confirmada (A enviar)</label>
+            <input id="swal-prep-cant" class="swal2-input" type="number" step="0.01" value="${cantSol}" style="margin: 0; width: 100%; border-radius: 8px;">
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-weight: 600; font-size: 13px; color: #334155;">Clasificación de Ruta</label>
+            <select id="swal-prep-clasif" class="swal2-input" style="margin: 0; width: 100%; border-radius: 8px;">
               <option value="PRIORIDAD">PRIORIDAD (Entrega rápida)</option>
               <option value="COSTO">COSTO (Ahorro transporte)</option>
               <option value="TIEMPO">TIEMPO (Optimización horario)</option>
@@ -377,8 +434,8 @@ export class GestionTransferenciasSolicitadasComponent implements OnInit {
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-weight: 600; font-size: 13px;">Lead Time Estándar (días)</label>
-            <input id="swal-prep-lead" class="swal2-input" type="number" placeholder="Ej: 2" value="2" style="margin: 0; width: 100%;">
+            <label style="font-weight: 600; font-size: 13px; color: #334155;">Lead Time Estándar (días)</label>
+            <input id="swal-prep-lead" class="swal2-input" type="number" placeholder="Ej: 2" value="2" style="margin: 0; width: 100%; border-radius: 8px;">
           </div>
         </div>
       `,

@@ -6,6 +6,8 @@ import com.inventory.modelo.dto.tablero.AlertaStockDTO;
 import com.inventory.repositorios.ventas.VentaRepositorio;
 import com.inventory.repositorios.inventario.InventarioRepositorio;
 import com.inventory.repositorios.transferencias.TransferenciaRepositorio;
+import com.inventory.repositorios.compras.OrdenCompraRepositorio;
+import com.inventory.modelo.enums.EstadoCompra;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
@@ -18,6 +20,7 @@ public class TableroServicioImpl implements TableroServicio {
     private final VentaRepositorio ventaRepositorio;
     private final InventarioRepositorio inventarioRepositorio;
     private final TransferenciaRepositorio transferenciaRepositorio;
+    private final OrdenCompraRepositorio ordenCompraRepositorio;
 
     /**
      * RF-24: Dashboard crítico — agrega KPIs en tiempo real del día actual.
@@ -38,11 +41,13 @@ public class TableroServicioImpl implements TableroServicio {
         long pendientes = transferenciaRepositorio.findHistoricalTransfers(null, "SOLICITADO", null, null, unpaged).getContent().size();
         long enTransito = transferenciaRepositorio.findHistoricalTransfers(null, "EN_TRANSITO", null, null, unpaged).getContent().size();
 
+        long pendientesRecepcion = ordenCompraRepositorio.findByEstado(EstadoCompra.PENDIENTE.name()).size();
+
         return new TableroResumenDTO(
                 ventasHoy, ingresoHoy,
                 enStockMinimo, agotados,
                 pendientes, enTransito,
-                0L, // ordenes pendientes recepción (módulo compras - extensible)
+                pendientesRecepcion, // ordenes pendientes recepción (módulo compras)
                 alertas
         );
     }

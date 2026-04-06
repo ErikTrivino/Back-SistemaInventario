@@ -293,7 +293,21 @@ public class DataInitializer implements CommandLineRunner {
     private void seedInventario(List<Sucursal> sucursales, List<Producto> productos) {
         if (inventarioRepository.count() == 0 && !sucursales.isEmpty() && !productos.isEmpty()) {
             Random rand = new Random();
-            for (Sucursal s : sucursales) {
+            
+            // Definimos factores de variación de precio por sucursal para dar realismo
+            // Sede Principal (0): 1.0, Norte (1): 1.05, Medellín (2): 0.98, Cali (3): 1.02, Barranquilla (4): 1.10
+            BigDecimal[] factoresPrecio = {
+                new BigDecimal("1.00"), 
+                new BigDecimal("1.05"), 
+                new BigDecimal("0.98"), 
+                new BigDecimal("1.02"), 
+                new BigDecimal("1.10")
+            };
+
+            for (int i = 0; i < sucursales.size(); i++) {
+                Sucursal s = sucursales.get(i);
+                BigDecimal factor = (i < factoresPrecio.length) ? factoresPrecio[i] : new BigDecimal("1.00");
+
                 for (Producto p : productos) {
                     // Lógica de coherencia:
                     // 1. Si el producto ya está inactivo globalmente, queda inactivo en la sucursal.
@@ -301,18 +315,23 @@ public class DataInitializer implements CommandLineRunner {
                     //    EXCEPTO en un ~20% de casos aleatorios para pruebas de filtrado.
                     boolean estaActivoEnSucursal = p.getActivo() && (rand.nextInt(10) > 1);
 
+                    // El precio de costo en la sucursal varía según el factor definido
+                    BigDecimal precioSucursal = p.getPrecioCostoPromedio().multiply(factor);
+
                     inventarioRepository.save(Inventario.builder()
                             .sucursal(s)
                             .producto(p)
                             .stock(new BigDecimal(rand.nextInt(100) + 10))
                             .stockMinimo(new BigDecimal(5))
                             .activo(estaActivoEnSucursal)
+                            .precioCostoPromedio(precioSucursal)
                             .build());
                 }
             }
-            log.info("  - Inventario por sucursal inicializado (con varianza de estado activo/inactivo).");
+            log.info("  - Inventario por sucursal inicializado (con precios diferenciados y varianza de estado).");
         }
     }
+
 
     private void seedProductoProveedores(List<Producto> productos, List<Proveedor> proveedores) {
         if (productoProveedorRepository.count() == 0 && !productos.isEmpty() && !proveedores.isEmpty()) {

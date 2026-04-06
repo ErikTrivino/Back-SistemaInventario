@@ -6,7 +6,7 @@ import com.inventory.modelo.entidades.seguridad.Usuario;
 import com.inventory.modelo.enums.Rol;
 import com.inventory.repositorios.seguridad.UsuarioRepositorio;
 import com.inventory.servicios.interfaces.seguridad.UsuarioServicio;
-import com.inventory.servicios.interfaces.auditoria.AuditoriaServicio;
+import com.inventory.eventos.PublicadorEventos;
 import lombok.RequiredArgsConstructor;
 import com.inventory.config.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class UsuarioServicioImpl implements UsuarioServicio {
 
     private final UsuarioRepositorio usuarioRepositorio;
     private final PasswordEncoder passwordEncoder;
-    private final AuditoriaServicio auditService;
+    private final PublicadorEventos eventPublisher;
 
     @Override
     @Transactional
@@ -45,7 +45,7 @@ public class UsuarioServicioImpl implements UsuarioServicio {
                 .build();
 
         UsuarioResponseDTO response = mapToDTO(usuarioRepositorio.save(usuario));
-        auditService.registrarAccion("SISTEMA", "CREATE_USER", "Usuario", response.getId(), "Usuario creado: " + response.getCorreo());
+        eventPublisher.publicarAuditoria("SISTEMA", "CREATE_USER", "Usuario", response.getId(), "Usuario creado: " + response.getCorreo());
         return response;
     }
 
@@ -76,7 +76,7 @@ public class UsuarioServicioImpl implements UsuarioServicio {
         if (request.getActivo() != null) usuario.setActivo(request.getActivo());
 
         Usuario saved = usuarioRepositorio.save(usuario);
-        auditService.registrarAccion("1", "UPDATE_USER", "Usuario", saved.getId(), "Datos de usuario actualizados");
+        eventPublisher.publicarAuditoria("1", "UPDATE_USER", "Usuario", saved.getId(), "Datos de usuario actualizados");
         return mapToDTO(saved);
     }
 
@@ -88,7 +88,7 @@ public class UsuarioServicioImpl implements UsuarioServicio {
         usuario.setActivo(false);
         usuario.setMotivoInactivacion(motivo);
         usuarioRepositorio.save(usuario);
-        auditService.registrarAccion("1", "INACTIVATE_USER", "Usuario", id, "Usuario inactivado. Motivo: " + motivo);
+        eventPublisher.publicarAuditoria("1", "INACTIVATE_USER", "Usuario", id, "Usuario inactivado. Motivo: " + motivo);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class UsuarioServicioImpl implements UsuarioServicio {
                 .orElseThrow(() -> new Exception("Usuario no encontrado con ID: " + id));
         usuario.setRol(nuevoRol);
         usuarioRepositorio.save(usuario);
-        auditService.registrarAccion("1", "CHANGE_ROLE", "Usuario", id, "Rol actualizado a: " + nuevoRol.name());
+        eventPublisher.publicarAuditoria("1", "CHANGE_ROLE", "Usuario", id, "Rol actualizado a: " + nuevoRol.name());
         return "Rol del usuario " + usuario.getNombre() + " actualizado a " + nuevoRol.name();
     }
 

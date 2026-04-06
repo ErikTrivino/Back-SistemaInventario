@@ -3,7 +3,6 @@ package com.inventory.servicios.implementaciones.inventario;
 import com.inventory.modelo.dto.inventario.*;
 import lombok.extern.slf4j.Slf4j;
 import com.inventory.servicios.interfaces.inventario.InventarioServicio;
-import com.inventory.servicios.interfaces.auditoria.AuditoriaServicio;
 import com.inventory.eventos.PublicadorEventos;
 import com.inventory.repositorios.inventario.ProductoRepositorio;
 import com.inventory.repositorios.inventario.InventarioRepositorio;
@@ -36,7 +35,6 @@ public class InventarioServicioImpl implements InventarioServicio {
     private final ProductoRepositorio productRepository;
     private final InventarioRepositorio inventoryRepository;
     private final MovimientoInventarioRepositorio movementRepository;
-    private final AuditoriaServicio auditService;
     private final PublicadorEventos eventPublisher;
     private final ProductoProveedorRepositorio productProviderRepository;
     private final SucursalRepositorio sucursalRepository;
@@ -46,9 +44,15 @@ public class InventarioServicioImpl implements InventarioServicio {
     public ProductoDetalleDTO createProduct(ProductoCrearDTO dto) {
         java.math.BigDecimal costBase = java.math.BigDecimal.ZERO;
         if (dto.detalleProdcutoCrearDTO() != null && !dto.detalleProdcutoCrearDTO().isEmpty()) {
-            costBase = dto.detalleProdcutoCrearDTO().get(0).precioCostoPromedio() == null
-                    ? java.math.BigDecimal.ZERO
-                    : dto.detalleProdcutoCrearDTO().get(0).precioCostoPromedio();
+            List<BigDecimal> prices = dto.detalleProdcutoCrearDTO().stream()
+                    .map(DetalleProdcutoCrearDTO::precioCostoPromedio)
+                    .filter(p -> p != null && p.compareTo(BigDecimal.ZERO) > 0)
+                    .collect(Collectors.toList());
+
+            if (!prices.isEmpty()) {
+                BigDecimal total = prices.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+                costBase = total.divide(BigDecimal.valueOf(prices.size()), 2, java.math.RoundingMode.HALF_UP);
+            }
         }
 
         Producto product = Producto.builder()
@@ -87,12 +91,16 @@ public class InventarioServicioImpl implements InventarioServicio {
 
             BigDecimal stock = BigDecimal.ZERO;
             BigDecimal stockMinimo = BigDecimal.ZERO;
+            BigDecimal precioSucursal = costBase;
             boolean activo = false;
 
             if (detail != null) {
                 stock = detail.cantidadInicial() == null ? BigDecimal.ZERO : detail.cantidadInicial();
                 stockMinimo = detail.cantidadMinima() == null ? BigDecimal.ZERO : detail.cantidadMinima();
                 activo = dto.activo();
+                if (detail.precioCostoPromedio() != null) {
+                    precioSucursal = detail.precioCostoPromedio();
+                }
             }
 
             Inventario inventario = Inventario.builder()
@@ -101,6 +109,7 @@ public class InventarioServicioImpl implements InventarioServicio {
                     .stock(stock)
                     .stockMinimo(stockMinimo)
                     .activo(activo)
+                    .precioCostoPromedio(precioSucursal)
                     .build();
             inventoryRepository.save(inventario);
 
@@ -117,14 +126,15 @@ public class InventarioServicioImpl implements InventarioServicio {
             }
         }
 
-        auditService.registrarAccion("1", "CREATE", "Producto", saved.getId(), "Created product");
+        eventPublisher.publicarAuditoria("1", "CREATE", "Producto", saved.getId(), "Created product");
         return toDetalleDTO(saved);
     }
 
     @Override
     @Transactional
     public ProductoDetalleDTO updateProduct(Long id, ProductoEditarDTO dto) {
-        log.info(">>> [updateProduct] id={} | nombre={} | descripcion={} | sku={} | unidadMedida={} | precioCosto={} | stock={} | activo={} | idSucursal={} | idProveedor={} | idUsuario={} | razonCambio={}",
+        log.info(
+                ">>> [updateProduct] id={} | nombre={} | descripcion={} | sku={} | unidadMedida={} | precioCosto={} | stock={} | activo={} | idSucursal={} | idProveedor={} | idUsuario={} | razonCambio={}",
                 id, dto.nombre(), dto.descripcion(), dto.sku(), dto.unidadMedidaBase(),
                 dto.precioCostoPromedio(), dto.stock(), dto.activo(),
                 dto.idSucursal(), dto.idProveedor(), dto.idUsuarioResponsable(), dto.razonCambio());
@@ -153,22 +163,24 @@ public class InventarioServicioImpl implements InventarioServicio {
                                 .stock(java.math.BigDecimal.ZERO)
                                 .stockMinimo(java.math.BigDecimal.ZERO)
                                 .activo(dto.activo())
+                                .precioCostoPromedio(dto.precioCostoPromedio() == null ? java.math.BigDecimal.ZERO
+                                        : dto.precioCostoPromedio())
                                 .build();
                     });
-                inv.setActivo(dto.activo());
-                inv.setStock(dto.stock());
-                inventoryRepository.save(inv);
+            inv.setActivo(dto.activo());
+            inv.setStock(dto.stock());
+            inventoryRepository.save(inv);
 
-                MovimientoInventario movement = MovimientoInventario.builder()
-                        .tipo(TipoMovimiento.AJUSTE)
-                        .cantidad(dto.stock())
-                        .fechaMovimiento(LocalDateTime.now())
-                        .sucursalId(dto.idSucursal())
-                        .productoId(product.getId())
-                        .usuarioId(dto.idUsuarioResponsable())
-                        .motivo(dto.razonCambio() != null ? dto.razonCambio() : "Actualización desde edición de producto")
-                        .build();
-                movementRepository.save(movement);
+            MovimientoInventario movement = MovimientoInventario.builder()
+                    .tipo(TipoMovimiento.AJUSTE)
+                    .cantidad(dto.stock())
+                    .fechaMovimiento(LocalDateTime.now())
+                    .sucursalId(dto.idSucursal())
+                    .productoId(product.getId())
+                    .usuarioId(dto.idUsuarioResponsable())
+                    .motivo(dto.razonCambio() != null ? dto.razonCambio() : "Actualización desde edición de producto")
+                    .build();
+            movementRepository.save(movement);
 
         }
 
@@ -194,7 +206,7 @@ public class InventarioServicioImpl implements InventarioServicio {
         }
 
         String usuarioId = dto.idUsuarioResponsable() != null ? dto.idUsuarioResponsable().toString() : "1";
-        auditService.registrarAccion(usuarioId, "UPDATE", "Producto", saved.getId(),
+        eventPublisher.publicarAuditoria(usuarioId, "UPDATE", "Producto", saved.getId(),
                 "Producto actualizado: " + (dto.razonCambio() != null ? dto.razonCambio() : "Sin motivo especificado"));
 
         return toDetalleDTO(saved);
@@ -205,14 +217,15 @@ public class InventarioServicioImpl implements InventarioServicio {
     public void deleteProduct(Long idProducto, Long idSucursal) {
         if (idSucursal != null) {
             inventoryRepository.updateActivoStatus(idProducto, idSucursal, false);
-            auditService.registrarAccion("1", "DELETE_BRANCH_INVENTORY", "Inventario", idProducto,
+            eventPublisher.publicarAuditoria("1", "DELETE_BRANCH_INVENTORY", "Inventario", idProducto,
                     "Producto desactivado en sucursal ID: " + idSucursal);
         } else {
             Producto product = productRepository.findById(idProducto)
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
             product.setActivo(false);
             productRepository.save(product);
-            auditService.registrarAccion("1", "DELETE_PRODUCT", "Producto", idProducto, "Producto desactivado globalmente");
+            eventPublisher.publicarAuditoria("1", "DELETE_PRODUCT", "Producto", idProducto,
+                    "Producto desactivado globalmente");
         }
     }
 
@@ -231,7 +244,8 @@ public class InventarioServicioImpl implements InventarioServicio {
     }
 
     @Override
-    public Page<InventarioRespuestaDTO> getInventoryByBranch(Long branchId, Boolean activo, Integer pagina, Integer porPagina) {
+    public Page<InventarioRespuestaDTO> getInventoryByBranch(Long branchId, Boolean activo, Integer pagina,
+            Integer porPagina) {
         int numPagina = (pagina != null && pagina > 0) ? pagina - 1 : 0;
         int tamanoPagina = (porPagina != null && porPagina > 0) ? porPagina : 10;
         Pageable pageable = PageRequest.of(numPagina, tamanoPagina);
@@ -283,7 +297,7 @@ public class InventarioServicioImpl implements InventarioServicio {
             eventPublisher.publicarActualizacionStock(inv, usuarioResponsable);
         }
 
-        auditService.registrarAccion("1", "UPDATE_STOCK", "Inventario", inv.getProductoId(),
+        eventPublisher.publicarAuditoria(usuarioResponsable, "UPDATE_STOCK", "Inventario", inv.getProductoId(),
                 "Stock updated: " + quantity);
     }
 
@@ -296,7 +310,8 @@ public class InventarioServicioImpl implements InventarioServicio {
     }
 
     @Override
-    public Page<InventarioRespuestaDTO> getCatalogoActivo(Long branchId, Boolean activo, Integer pagina, Integer porPagina) {
+    public Page<InventarioRespuestaDTO> getCatalogoActivo(Long branchId, Boolean activo, Integer pagina,
+            Integer porPagina) {
         int numPagina = (pagina != null && pagina > 0) ? pagina - 1 : 0;
         int tamanoPagina = (porPagina != null && porPagina > 0) ? porPagina : 10;
         Pageable pageable = PageRequest.of(numPagina, tamanoPagina);

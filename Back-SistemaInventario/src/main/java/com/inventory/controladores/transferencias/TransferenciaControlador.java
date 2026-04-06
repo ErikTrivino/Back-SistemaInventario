@@ -10,6 +10,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import com.inventory.modelo.enums.EstadoTransferencia;
 
 @RestController
 @RequestMapping("/api/transferencias")
@@ -77,5 +80,30 @@ public class TransferenciaControlador {
             @RequestParam(required = false) Integer pagina) {
         return ResponseEntity.ok(new MensajeDTO<>(false,
                 transferService.getTransfersByDestino(sucursalDestino, estado, desde, hasta, pagina, porPagina)));
+    }
+
+    @GetMapping("/sucursalDestino")
+    public ResponseEntity<MensajeDTO<Object>> porSucursalDestino(
+            @RequestParam Long sucursalDestino,
+            @RequestParam(required = false, defaultValue = "10") Integer porPagina,
+            @RequestParam(required = false) Integer pagina) {
+        List<String> estados = Arrays.asList(
+                EstadoTransferencia.EN_TRANSITO.name(),
+                EstadoTransferencia.RECIBIDO.name(),
+                EstadoTransferencia.CANCELADO.name());
+        return ResponseEntity.ok(new MensajeDTO<>(false,
+                transferService.getTransfersByDestinoAndStatuses(sucursalDestino, estados, pagina, porPagina)));
+    }
+
+    @GetMapping("/sucursalOrigen")
+    public ResponseEntity<MensajeDTO<Object>> porSucursalOrigen(
+            @RequestParam Long sucursalOrigen,
+            @RequestParam(required = false, defaultValue = "10") Integer porPagina,
+            @RequestParam(required = false) Integer pagina) {
+        List<String> estados = Arrays.asList(
+                EstadoTransferencia.SOLICITADO.name(),
+                EstadoTransferencia.APROBADO.name());
+        return ResponseEntity.ok(new MensajeDTO<>(false,
+                transferService.getTransfersByOrigenAndStatuses(sucursalOrigen, estados, pagina, porPagina)));
     }
 }
